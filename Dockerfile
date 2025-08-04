@@ -13,7 +13,7 @@ COPY pom.xml .
 RUN chmod +x mvnw
 
 # 依存関係をダウンロード
-RUN ./mvnw dependency:go-offline -B
+RUN ./mvnw dependency:resolve -B
 
 # ソースコードをコピー
 COPY src src
