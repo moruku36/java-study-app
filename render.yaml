@@ -10,6 +10,12 @@ services:
         value: 17
       - key: SPRING_PROFILES_ACTIVE
         value: production
+      - key: DATABASE_URL
+        value: jdbc:postgresql://dpg-d285h0ggjchc738ul2s0-a/mydb_t10f
+      - key: DATABASE_USERNAME
+        value: mydb_t10f_user
+      - key: DATABASE_PASSWORD
+        value: eGZOMQiK0TTp9MBUxDPdF63PCip5fa0A
       - key: DDL_AUTO
         value: update
       - key: SHOW_SQL
