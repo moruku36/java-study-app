@@ -61,10 +61,10 @@ spring:
       mode: always
       continue-on-error: true
   
-  # データ初期化無効化（本番環境）
+  # データ初期化有効化（本番環境 - デバッグ用）
   data:
     init:
-      enabled: false
+      enabled: true
 
 # サーバー設定
 server:
