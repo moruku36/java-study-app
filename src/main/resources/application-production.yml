@@ -31,14 +31,12 @@ spring:
           provider_disables_autocommit: true
         jdbc:
           batch_size: 50
+          batch_versioned_data: true
         order_inserts: true
         order_updates: true
         cache:
           use_second_level_cache: false
           use_query_cache: false
-        # エラーハンドリング設定
-        jdbc:
-          batch_versioned_data: true
 
   # Thymeleaf設定（本番環境）
   thymeleaf:
