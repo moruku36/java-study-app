@@ -10,7 +10,7 @@ COPY .mvn .mvn
 COPY pom.xml .
 
 # Maven Wrapperに実行権限を付与
-RUN chmod +x mvnw && chmod +x mvnw.cmd
+RUN chmod +x mvnw
 
 # 依存関係をダウンロード
 RUN ./mvnw dependency:go-offline -B
