@@ -12,8 +12,8 @@ COPY pom.xml .
 # Maven Wrapperに実行権限を付与
 RUN chmod +x mvnw
 
-# 依存関係をダウンロード
-RUN ./mvnw dependency:resolve -B
+# 依存関係をダウンロード（より確実な方法）
+RUN ./mvnw dependency:resolve-plugins dependency:resolve -B
 
 # ソースコードをコピー
 COPY src src
