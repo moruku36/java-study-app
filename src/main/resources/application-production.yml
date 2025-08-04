@@ -26,7 +26,7 @@ spring:
     open-in-view: false
     properties:
       hibernate:
-        format_sql: false
+        format_sql: true
         connection:
           provider_disables_autocommit: true
         jdbc:
@@ -36,6 +36,9 @@ spring:
         cache:
           use_second_level_cache: false
           use_query_cache: false
+        # エラーハンドリング設定
+        jdbc:
+          batch_versioned_data: true
 
   # Thymeleaf設定（本番環境）
   thymeleaf:
@@ -58,6 +61,7 @@ spring:
   sql:
     init:
       mode: always
+      continue-on-error: true
 
 # サーバー設定
 server:
@@ -66,13 +70,16 @@ server:
     enabled: true
     mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
 
+# デバッグモード有効化
+debug: true
+
 # ログ設定（本番環境）
 logging:
   level:
     com.studyapp: DEBUG
-    org.springframework: INFO
-    org.hibernate: INFO
-    root: INFO
+    org.springframework: DEBUG
+    org.hibernate: DEBUG
+    root: DEBUG
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
 
