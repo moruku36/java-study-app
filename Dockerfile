@@ -4,22 +4,17 @@ FROM maven:3.9.6-eclipse-temurin-17 AS build
 # 作業ディレクトリを設定
 WORKDIR /app
 
-# Maven Wrapperとpom.xmlをコピー
-COPY mvnw .
-COPY .mvn .mvn
+# pom.xmlをコピー
 COPY pom.xml .
 
-# Maven Wrapperに実行権限を付与
-RUN chmod +x mvnw
-
-# 依存関係をダウンロード（より確実な方法）
-RUN ./mvnw dependency:resolve-plugins dependency:resolve -B
+# 依存関係をダウンロード
+RUN mvn dependency:go-offline -B
 
 # ソースコードをコピー
 COPY src src
 
 # アプリケーションをビルド
-RUN ./mvnw clean package -DskipTests
+RUN mvn clean package -DskipTests
 
 # 実行用イメージ
 FROM eclipse-temurin:17-jre-alpine
