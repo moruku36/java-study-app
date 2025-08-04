@@ -1,14 +1,14 @@
 services:
+  - type: pserv
+    name: study-app-db
+    env: postgresql
+    plan: free
+
   - type: web
     name: java-study-app
     env: java
     buildCommand: ./mvnw clean package -DskipTests
     startCommand: java -jar target/java-study-app-1.0.0.jar
-    plan: free
-
-  - type: pserv
-    name: study-app-db
-    env: postgresql
     plan: free
     envVars:
       - key: JAVA_VERSION
