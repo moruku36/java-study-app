@@ -1,0 +1,383 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学習目標 - 学習進捗トラッカー</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            margin: 0.25rem 0;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+        
+        .main-content {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 25px;
+            padding: 0.5rem 1.5rem;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.2);
+        }
+        
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+            padding: 0.75rem;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+        
+        .goal-card {
+            border-left: 4px solid #667eea;
+        }
+        
+        .goal-card.inactive {
+            border-left-color: #6c757d;
+            opacity: 0.7;
+        }
+        
+        .badge-active {
+            background: linear-gradient(135deg, #28a745 0%, #20c997 100%);
+        }
+        
+        .badge-inactive {
+            background: linear-gradient(135deg, #6c757d 0%, #495057 100%);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <div class="text-center mb-4">
+                        <h4 class="text-white">
+                            <i class="fas fa-graduation-cap me-2"></i>
+                            学習トラッカー
+                        </h4>
+                    </div>
+                    
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/dashboard(userId=${user.id})}">
+                                <i class="fas fa-tachometer-alt me-2"></i>
+                                ダッシュボード
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" th:href="@{/goals(userId=${user.id})}">
+                                <i class="fas fa-bullseye me-2"></i>
+                                学習目標
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/log(userId=${user.id})}">
+                                <i class="fas fa-plus-circle me-2"></i>
+                                学習記録
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/history(userId=${user.id})}">
+                                <i class="fas fa-history me-2"></i>
+                                学習履歴
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <hr class="text-white-50">
+                    
+                    <div class="text-center">
+                        <div class="text-white-50 small">
+                            <i class="fas fa-user me-2"></i>
+                            <span th:text="${user.username}">ユーザー名</span>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+            
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+                <div class="pt-3 pb-2 mb-3">
+                    <!-- Header -->
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                        <h1 class="h2">
+                            <i class="fas fa-bullseye me-2"></i>
+                            学習目標管理
+                        </h1>
+                        <div class="btn-toolbar mb-2 mb-md-0">
+                            <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addGoalModal">
+                                <i class="fas fa-plus me-2"></i>
+                                新しい目標を作成
+                            </button>
+                        </div>
+                    </div>
+                    
+                    <!-- Goals List -->
+                    <div class="row">
+                        <div class="col-12">
+                            <div th:if="${goals.isEmpty()}" class="text-center py-5">
+                                <i class="fas fa-bullseye fa-3x text-muted mb-3"></i>
+                                <h4 class="text-muted">学習目標がありません</h4>
+                                <p class="text-muted">新しい学習目標を作成して、学習を始めましょう！</p>
+                                <button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addGoalModal">
+                                    <i class="fas fa-plus me-2"></i>
+                                    最初の目標を作成
+                                </button>
+                            </div>
+                            
+                            <div th:each="goal : ${goals}" class="card goal-card mb-3" th:classappend="${!goal.isActive} ? 'inactive'">
+                                <div class="card-body">
+                                    <div class="row align-items-center">
+                                        <div class="col-md-8">
+                                            <div class="d-flex justify-content-between align-items-start mb-2">
+                                                <h5 class="card-title mb-0" th:text="${goal.subject}">科目名</h5>
+                                                <span class="badge" th:class="${goal.isActive} ? 'badge-active' : 'badge-inactive'"
+                                                      th:text="${goal.isActive} ? 'アクティブ' : '非アクティブ'">ステータス</span>
+                                            </div>
+                                            <p class="card-text text-muted mb-2">
+                                                <i class="fas fa-clock me-2"></i>
+                                                目標: <strong th:text="${goal.dailyTargetMinutes} + '分/日'">目標時間</strong>
+                                            </p>
+                                            <p class="card-text text-muted mb-0">
+                                                <i class="fas fa-calendar me-2"></i>
+                                                開始日: <span th:text="${#temporals.format(goal.startDate, 'yyyy/MM/dd')}">開始日</span>
+                                                <span th:if="${goal.endDate}" th:text="' - 終了日: ' + ${#temporals.format(goal.endDate, 'yyyy/MM/dd')}">終了日</span>
+                                            </p>
+                                        </div>
+                                        <div class="col-md-4 text-end">
+                                            <div class="btn-group" role="group">
+                                                <button type="button" class="btn btn-outline-primary btn-sm" 
+                                                        th:onclick="'editGoal(' + ${goal.id} + ')'">
+                                                    <i class="fas fa-edit"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-outline-warning btn-sm" 
+                                                        th:if="${goal.isActive}" th:onclick="'deactivateGoal(' + ${goal.id} + ')'">
+                                                    <i class="fas fa-pause"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-outline-success btn-sm" 
+                                                        th:unless="${goal.isActive}" th:onclick="'activateGoal(' + ${goal.id} + ')'">
+                                                    <i class="fas fa-play"></i>
+                                                </button>
+                                                <button type="button" class="btn btn-outline-danger btn-sm" 
+                                                        th:onclick="'deleteGoal(' + ${goal.id} + ')'">
+                                                    <i class="fas fa-trash"></i>
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- Add Goal Modal -->
+    <div class="modal fade" id="addGoalModal" tabindex="-1" aria-labelledby="addGoalModalLabel" aria-hidden="true">
+        <div class="modal-dialog">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h5 class="modal-title" id="addGoalModalLabel">
+                        <i class="fas fa-plus me-2"></i>
+                        新しい学習目標を作成
+                    </h5>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body">
+                    <form id="addGoalForm">
+                        <input type="hidden" name="userId" th:value="${user.id}">
+                        
+                        <div class="mb-3">
+                            <label for="subject" class="form-label">
+                                <i class="fas fa-book me-2"></i>
+                                科目名
+                            </label>
+                            <input type="text" class="form-control" id="subject" name="subject" 
+                                   placeholder="例: Java, 数学, 英語" required>
+                        </div>
+                        
+                        <div class="mb-3">
+                            <label for="dailyTargetMinutes" class="form-label">
+                                <i class="fas fa-clock me-2"></i>
+                                1日の目標学習時間（分）
+                            </label>
+                            <input type="number" class="form-control" id="dailyTargetMinutes" name="dailyTargetMinutes" 
+                                   min="1" max="1440" placeholder="例: 60" required>
+                        </div>
+                        
+                        <div class="row">
+                            <div class="col-md-6 mb-3">
+                                <label for="startDate" class="form-label">
+                                    <i class="fas fa-calendar me-2"></i>
+                                    開始日
+                                </label>
+                                <input type="date" class="form-control" id="startDate" name="startDate" required>
+                            </div>
+                            
+                            <div class="col-md-6 mb-3">
+                                <label for="endDate" class="form-label">
+                                    <i class="fas fa-calendar me-2"></i>
+                                    終了日（任意）
+                                </label>
+                                <input type="date" class="form-control" id="endDate" name="endDate">
+                            </div>
+                        </div>
+                    </form>
+                </div>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">
+                        <i class="fas fa-times me-2"></i>
+                        キャンセル
+                    </button>
+                    <button type="button" class="btn btn-primary" onclick="saveGoal()">
+                        <i class="fas fa-save me-2"></i>
+                        保存
+                    </button>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script>
+        // 目標保存処理
+        function saveGoal() {
+            const form = document.getElementById('addGoalForm');
+            const formData = new FormData(form);
+            const data = Object.fromEntries(formData);
+            
+            fetch('/api/goals/create', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.id) {
+                    alert('学習目標が正常に作成されました！');
+                    location.reload();
+                } else {
+                    alert('エラーが発生しました。もう一度お試しください。');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('エラーが発生しました。もう一度お試しください。');
+            });
+        }
+        
+        // 目標編集処理
+        function editGoal(goalId) {
+            // 実装予定
+            alert('編集機能は実装予定です。');
+        }
+        
+        // 目標非アクティブ化処理
+        function deactivateGoal(goalId) {
+            if (confirm('この目標を非アクティブにしますか？')) {
+                fetch(`/api/goals/${goalId}/deactivate`, {
+                    method: 'PUT'
+                })
+                .then(response => {
+                    if (response.ok) {
+                        alert('目標が非アクティブになりました。');
+                        location.reload();
+                    } else {
+                        alert('エラーが発生しました。');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('エラーが発生しました。');
+                });
+            }
+        }
+        
+        // 目標アクティブ化処理
+        function activateGoal(goalId) {
+            // 実装予定
+            alert('アクティブ化機能は実装予定です。');
+        }
+        
+        // 目標削除処理
+        function deleteGoal(goalId) {
+            if (confirm('この目標を削除しますか？この操作は取り消せません。')) {
+                fetch(`/api/goals/${goalId}`, {
+                    method: 'DELETE'
+                })
+                .then(response => {
+                    if (response.ok) {
+                        alert('目標が削除されました。');
+                        location.reload();
+                    } else {
+                        alert('エラーが発生しました。');
+                    }
+                })
+                .catch(error => {
+                    console.error('Error:', error);
+                    alert('エラーが発生しました。');
+                });
+            }
+        }
+        
+        // ページ読み込み時の初期化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 今日の日付を開始日に設定
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('startDate').value = today;
+        });
+    </script>
+</body>
+</html> 

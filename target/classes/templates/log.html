@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学習記録 - 学習進捗トラッカー</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            margin: 0.25rem 0;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+        
+        .main-content {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 25px;
+            padding: 0.5rem 1.5rem;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.2);
+        }
+        
+        .form-control, .form-select {
+            border-radius: 10px;
+            border: 1px solid #e9ecef;
+            padding: 0.75rem;
+        }
+        
+        .form-control:focus, .form-select:focus {
+            border-color: #667eea;
+            box-shadow: 0 0 0 0.2rem rgba(102, 126, 234, 0.25);
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <div class="text-center mb-4">
+                        <h4 class="text-white">
+                            <i class="fas fa-graduation-cap me-2"></i>
+                            学習トラッカー
+                        </h4>
+                    </div>
+                    
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/dashboard(userId=${user.id})}">
+                                <i class="fas fa-tachometer-alt me-2"></i>
+                                ダッシュボード
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/goals(userId=${user.id})}">
+                                <i class="fas fa-bullseye me-2"></i>
+                                学習目標
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" th:href="@{/log(userId=${user.id})}">
+                                <i class="fas fa-plus-circle me-2"></i>
+                                学習記録
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/history(userId=${user.id})}">
+                                <i class="fas fa-history me-2"></i>
+                                学習履歴
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <hr class="text-white-50">
+                    
+                    <div class="text-center">
+                        <div class="text-white-50 small">
+                            <i class="fas fa-user me-2"></i>
+                            <span th:text="${user.username}">ユーザー名</span>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+            
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+                <div class="pt-3 pb-2 mb-3">
+                    <!-- Header -->
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                        <h1 class="h2">
+                            <i class="fas fa-plus-circle me-2"></i>
+                            学習記録を追加
+                        </h1>
+                        <div class="btn-toolbar mb-2 mb-md-0">
+                            <a th:href="@{/dashboard(userId=${user.id})}" class="btn btn-outline-secondary">
+                                <i class="fas fa-arrow-left me-2"></i>
+                                ダッシュボードに戻る
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Form -->
+                    <div class="row justify-content-center">
+                        <div class="col-lg-8">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">
+                                        <i class="fas fa-edit me-2"></i>
+                                        学習記録フォーム
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <form th:action="@{/api/logs/log}" method="post" id="studyLogForm">
+                                        <input type="hidden" name="userId" th:value="${user.id}">
+                                        
+                                        <div class="row">
+                                            <div class="col-md-6 mb-3">
+                                                <label for="studyDate" class="form-label">
+                                                    <i class="fas fa-calendar me-2"></i>
+                                                    学習日
+                                                </label>
+                                                <input type="date" class="form-control" id="studyDate" name="studyDate" 
+                                                       th:value="${#temporals.format(today, 'yyyy-MM-dd')}" required>
+                                            </div>
+                                            
+                                            <div class="col-md-6 mb-3">
+                                                <label for="minutesStudied" class="form-label">
+                                                    <i class="fas fa-clock me-2"></i>
+                                                    学習時間（分）
+                                                </label>
+                                                <input type="number" class="form-control" id="minutesStudied" name="minutesStudied" 
+                                                       min="1" max="1440" placeholder="例: 60" required>
+                                                <div class="form-text">1分〜1440分（24時間）の間で入力してください</div>
+                                            </div>
+                                        </div>
+                                        
+                                        <div class="mb-3">
+                                            <label for="notes" class="form-label">
+                                                <i class="fas fa-sticky-note me-2"></i>
+                                                メモ（任意）
+                                            </label>
+                                            <textarea class="form-control" id="notes" name="notes" rows="4" 
+                                                      placeholder="学習内容や感想を記録してください..."></textarea>
+                                        </div>
+                                        
+                                        <div class="d-grid gap-2 d-md-flex justify-content-md-end">
+                                            <button type="button" class="btn btn-outline-secondary me-md-2" onclick="resetForm()">
+                                                <i class="fas fa-undo me-2"></i>
+                                                リセット
+                                            </button>
+                                            <button type="submit" class="btn btn-primary">
+                                                <i class="fas fa-save me-2"></i>
+                                                記録を保存
+                                            </button>
+                                        </div>
+                                    </form>
+                                </div>
+                            </div>
+                            
+                            <!-- Quick Add Buttons -->
+                            <div class="card mt-4">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">
+                                        <i class="fas fa-bolt me-2"></i>
+                                        クイック追加
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="row">
+                                        <div class="col-md-3 mb-2">
+                                            <button type="button" class="btn btn-outline-primary w-100" onclick="quickAdd(30)">
+                                                30分
+                                            </button>
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <button type="button" class="btn btn-outline-primary w-100" onclick="quickAdd(60)">
+                                                1時間
+                                            </button>
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <button type="button" class="btn btn-outline-primary w-100" onclick="quickAdd(90)">
+                                                1.5時間
+                                            </button>
+                                        </div>
+                                        <div class="col-md-3 mb-2">
+                                            <button type="button" class="btn btn-outline-primary w-100" onclick="quickAdd(120)">
+                                                2時間
+                                            </button>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Custom JavaScript -->
+    <script>
+        // フォーム送信処理
+        document.getElementById('studyLogForm').addEventListener('submit', function(e) {
+            e.preventDefault();
+            
+            const formData = new FormData(this);
+            const data = Object.fromEntries(formData);
+            
+            fetch('/api/logs/log', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/x-www-form-urlencoded',
+                },
+                body: new URLSearchParams(data)
+            })
+            .then(response => response.json())
+            .then(data => {
+                if (data.id) {
+                    alert('学習記録が正常に保存されました！');
+                    window.location.href = '/dashboard?userId=' + data.user.id;
+                } else {
+                    alert('エラーが発生しました。もう一度お試しください。');
+                }
+            })
+            .catch(error => {
+                console.error('Error:', error);
+                alert('エラーが発生しました。もう一度お試しください。');
+            });
+        });
+        
+        // クイック追加機能
+        function quickAdd(minutes) {
+            document.getElementById('minutesStudied').value = minutes;
+        }
+        
+        // フォームリセット
+        function resetForm() {
+            document.getElementById('studyLogForm').reset();
+            document.getElementById('studyDate').value = new Date().toISOString().split('T')[0];
+        }
+        
+        // ページ読み込み時の初期化
+        document.addEventListener('DOMContentLoaded', function() {
+            // 今日の日付を設定
+            const today = new Date().toISOString().split('T')[0];
+            document.getElementById('studyDate').value = today;
+        });
+    </script>
+</body>
+</html> 

@@ -1,0 +1,265 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>学習履歴 - 学習進捗トラッカー</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            margin: 0.25rem 0;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+        
+        .main-content {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 25px;
+            padding: 0.5rem 1.5rem;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.2);
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+        
+        .log-item {
+            border-left: 4px solid #667eea;
+            padding-left: 1rem;
+            margin-bottom: 1rem;
+        }
+        
+        .log-date {
+            font-weight: bold;
+            color: #667eea;
+        }
+        
+        .log-minutes {
+            font-size: 1.2rem;
+            font-weight: bold;
+            color: #28a745;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <div class="text-center mb-4">
+                        <h4 class="text-white">
+                            <i class="fas fa-graduation-cap me-2"></i>
+                            学習トラッカー
+                        </h4>
+                    </div>
+                    
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/dashboard(userId=${user.id})}">
+                                <i class="fas fa-tachometer-alt me-2"></i>
+                                ダッシュボード
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/goals(userId=${user.id})}">
+                                <i class="fas fa-bullseye me-2"></i>
+                                学習目標
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/log(userId=${user.id})}">
+                                <i class="fas fa-plus-circle me-2"></i>
+                                学習記録
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link active" th:href="@{/history(userId=${user.id})}">
+                                <i class="fas fa-history me-2"></i>
+                                学習履歴
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <hr class="text-white-50">
+                    
+                    <div class="text-center">
+                        <div class="text-white-50 small">
+                            <i class="fas fa-user me-2"></i>
+                            <span th:text="${user.username}">ユーザー名</span>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+            
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+                <div class="pt-3 pb-2 mb-3">
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                        <h1 class="h2">
+                            <i class="fas fa-history me-2"></i>
+                            学習履歴
+                        </h1>
+                    </div>
+                    
+                    <!-- エラーメッセージ -->
+                    <div th:if="${error}" class="alert alert-danger" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <span th:text="${error}"></span>
+                    </div>
+                    
+                    <!-- 期間選択フォーム -->
+                    <div class="card mb-4">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <i class="fas fa-calendar me-2"></i>
+                                期間選択
+                            </h5>
+                            <form th:action="@{/history}" method="get" class="row g-3">
+                                <input type="hidden" name="userId" th:value="${user.id}">
+                                <div class="col-md-4">
+                                    <label for="startDate" class="form-label">開始日</label>
+                                    <input type="date" class="form-control" id="startDate" name="startDate" 
+                                           th:value="${#temporals.format(startDate, 'yyyy-MM-dd')}">
+                                </div>
+                                <div class="col-md-4">
+                                    <label for="endDate" class="form-label">終了日</label>
+                                    <input type="date" class="form-control" id="endDate" name="endDate" 
+                                           th:value="${#temporals.format(endDate, 'yyyy-MM-dd')}">
+                                </div>
+                                <div class="col-md-4 d-flex align-items-end">
+                                    <button type="submit" class="btn btn-primary">
+                                        <i class="fas fa-search me-2"></i>
+                                        検索
+                                    </button>
+                                </div>
+                            </form>
+                        </div>
+                    </div>
+                    
+                    <!-- 学習記録一覧 -->
+                    <div class="card">
+                        <div class="card-body">
+                            <h5 class="card-title">
+                                <i class="fas fa-list me-2"></i>
+                                学習記録
+                                <span class="badge bg-primary ms-2" th:text="${logs.size()} + '件'"></span>
+                            </h5>
+                            
+                            <div th:if="${logs.empty}" class="text-center py-4">
+                                <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
+                                <p class="text-muted">この期間の学習記録はありません</p>
+                            </div>
+                            
+                            <div th:if="${!logs.empty}">
+                                <div class="row">
+                                    <div class="col-md-8">
+                                        <!-- 学習記録リスト -->
+                                        <div th:each="log : ${logs}" class="log-item">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <div class="log-date" th:text="${#temporals.format(log.studyDate, 'yyyy年MM月dd日 (E)', 'ja')}">
+                                                        2024年01月01日 (月)
+                                                    </div>
+                                                    <div th:if="${log.notes}" class="text-muted mt-1" th:text="${log.notes}">
+                                                        学習内容のメモ
+                                                    </div>
+                                                </div>
+                                                <div class="text-end">
+                                                    <div class="log-minutes" th:text="${log.minutesStudied} + '分'">
+                                                        60分
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    
+                                    <div class="col-md-4">
+                                        <!-- 統計情報 -->
+                                        <div class="card bg-light">
+                                            <div class="card-body">
+                                                <h6 class="card-title">
+                                                    <i class="fas fa-chart-bar me-2"></i>
+                                                    統計
+                                                </h6>
+                                                <div class="mb-3">
+                                                    <div class="d-flex justify-content-between">
+                                                        <span>総学習時間:</span>
+                                                        <strong th:text="${logs.stream().mapToInt(log -> log.minutesStudied).sum()} + '分'">
+                                                            0分
+                                                        </strong>
+                                                    </div>
+                                                </div>
+                                                <div class="mb-3">
+                                                    <div class="d-flex justify-content-between">
+                                                        <span>学習日数:</span>
+                                                        <strong th:text="${logs.size()} + '日'">0日</strong>
+                                                    </div>
+                                                </div>
+                                                <div>
+                                                    <div class="d-flex justify-content-between">
+                                                        <span>1日平均:</span>
+                                                        <strong th:with="avg=${logs.size() > 0 ? logs.stream().mapToInt(log -> log.minutesStudied).sum() / logs.size() : 0}" 
+                                                                th:text="${avg} + '分'">0分</strong>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+</body>
+</html> 

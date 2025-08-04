@@ -1,0 +1,107 @@
+package com.studyapp.config;
+
+import com.studyapp.domain.LearningGoal;
+import com.studyapp.domain.StudyLog;
+import com.studyapp.domain.User;
+import com.studyapp.service.LearningGoalService;
+import com.studyapp.service.StudyLogService;
+import com.studyapp.service.UserService;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.boot.CommandLineRunner;
+import org.springframework.stereotype.Component;
+
+import java.time.LocalDate;
+
+@Component
+public class DataInitializer implements CommandLineRunner {
+    
+    @Autowired
+    private UserService userService;
+    
+    @Autowired
+    private LearningGoalService learningGoalService;
+    
+    @Autowired
+    private StudyLogService studyLogService;
+    
+    @Override
+    public void run(String... args) throws Exception {
+        // サンプルユーザーを作成
+        User sampleUser = createSampleUser();
+        
+        // サンプル学習目標を作成
+        createSampleGoals(sampleUser);
+        
+        // サンプル学習記録を作成
+        createSampleStudyLogs(sampleUser);
+    }
+    
+    private User createSampleUser() {
+        // 既存のユーザーをチェック
+        if (userService.findByUsername("sample_user").isPresent()) {
+            return userService.findByUsername("sample_user").get();
+        }
+        
+        User user = new User("sample_user", "sample@example.com", "password123");
+        return userService.save(user);
+    }
+    
+    private void createSampleGoals(User user) {
+        // 既存の目標をチェック
+        if (!learningGoalService.findByUserId(user.getId()).isEmpty()) {
+            return;
+        }
+        
+        // Java学習目標
+        LearningGoal javaGoal = learningGoalService.createGoal(
+            user.getId(), 
+            "Java", 
+            60, 
+            LocalDate.now().minusDays(7), 
+            LocalDate.now().plusDays(30)
+        );
+        
+        // 数学学習目標
+        LearningGoal mathGoal = learningGoalService.createGoal(
+            user.getId(), 
+            "数学", 
+            45, 
+            LocalDate.now().minusDays(5), 
+            LocalDate.now().plusDays(20)
+        );
+        
+        // 英語学習目標
+        LearningGoal englishGoal = learningGoalService.createGoal(
+            user.getId(), 
+            "英語", 
+            30, 
+            LocalDate.now().minusDays(3), 
+            null
+        );
+    }
+    
+    private void createSampleStudyLogs(User user) {
+        // 既存の記録をチェック
+        if (!studyLogService.findByUserId(user.getId()).isEmpty()) {
+            return;
+        }
+        
+        LocalDate today = LocalDate.now();
+        
+        // 過去7日間のサンプルデータ
+        for (int i = 6; i >= 0; i--) {
+            LocalDate date = today.minusDays(i);
+            
+            // ランダムな学習時間（30-120分）
+            int minutes = 30 + (int)(Math.random() * 90);
+            
+            // 学習記録を作成
+            studyLogService.logStudy(
+                user.getId(),
+                date,
+                minutes,
+                "サンプル学習記録 - " + date.toString()
+            );
+        }
+    }
+} 

@@ -1,0 +1,377 @@
+<!DOCTYPE html>
+<html xmlns:th="http://www.thymeleaf.org">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ダッシュボード - 学習進捗トラッカー</title>
+    
+    <!-- Bootstrap CSS -->
+    <link href="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/css/bootstrap.min.css" rel="stylesheet">
+    <!-- Chart.js -->
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <!-- Font Awesome -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <style>
+        .sidebar {
+            min-height: 100vh;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        }
+        
+        .sidebar .nav-link {
+            color: rgba(255, 255, 255, 0.8);
+            padding: 0.75rem 1rem;
+            border-radius: 0.5rem;
+            margin: 0.25rem 0;
+            transition: all 0.3s ease;
+        }
+        
+        .sidebar .nav-link:hover,
+        .sidebar .nav-link.active {
+            color: white;
+            background-color: rgba(255, 255, 255, 0.1);
+            transform: translateX(5px);
+        }
+        
+        .main-content {
+            background-color: #f8f9fa;
+            min-height: 100vh;
+        }
+        
+        .card {
+            border: none;
+            border-radius: 15px;
+            box-shadow: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+            transition: transform 0.2s ease, box-shadow 0.2s ease;
+        }
+        
+        .card:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+        }
+        
+        .progress {
+            height: 10px;
+            border-radius: 5px;
+        }
+        
+        .btn-primary {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            border: none;
+            border-radius: 25px;
+            padding: 0.5rem 1.5rem;
+        }
+        
+        .btn-primary:hover {
+            transform: translateY(-1px);
+            box-shadow: 0 0.25rem 0.5rem rgba(0, 0, 0, 0.2);
+        }
+        
+        .stats-card {
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+        }
+        
+        .chart-container {
+            position: relative;
+            height: 300px;
+        }
+    </style>
+</head>
+<body>
+    <div class="container-fluid">
+        <div class="row">
+            <!-- Sidebar -->
+            <nav class="col-md-3 col-lg-2 d-md-block sidebar collapse">
+                <div class="position-sticky pt-3">
+                    <div class="text-center mb-4">
+                        <h4 class="text-white">
+                            <i class="fas fa-graduation-cap me-2"></i>
+                            学習トラッカー
+                        </h4>
+                    </div>
+                    
+                    <ul class="nav flex-column">
+                        <li class="nav-item">
+                            <a class="nav-link active" th:href="@{/dashboard(userId=${user.id})}">
+                                <i class="fas fa-tachometer-alt me-2"></i>
+                                ダッシュボード
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/goals(userId=${user.id})}">
+                                <i class="fas fa-bullseye me-2"></i>
+                                学習目標
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/log(userId=${user.id})}">
+                                <i class="fas fa-plus-circle me-2"></i>
+                                学習記録
+                            </a>
+                        </li>
+                        <li class="nav-item">
+                            <a class="nav-link" th:href="@{/history(userId=${user.id})}">
+                                <i class="fas fa-history me-2"></i>
+                                学習履歴
+                            </a>
+                        </li>
+                    </ul>
+                    
+                    <hr class="text-white-50">
+                    
+                    <div class="text-center">
+                        <div class="text-white-50 small">
+                            <i class="fas fa-user me-2"></i>
+                            <span th:text="${user.username}">ユーザー名</span>
+                        </div>
+                    </div>
+                </div>
+            </nav>
+            
+            <!-- Main content -->
+            <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 main-content">
+                <div class="pt-3 pb-2 mb-3">
+                    <!-- Header -->
+                    <div class="d-flex justify-content-between flex-wrap flex-md-nowrap align-items-center pb-2 mb-3 border-bottom">
+                        <h1 class="h2">
+                            <i class="fas fa-tachometer-alt me-2"></i>
+                            ダッシュボード
+                        </h1>
+                        <div class="btn-toolbar mb-2 mb-md-0">
+                            <a th:href="@{/log(userId=${user.id})}" class="btn btn-primary">
+                                <i class="fas fa-plus me-2"></i>
+                                学習記録を追加
+                            </a>
+                        </div>
+                    </div>
+                    
+                    <!-- Stats Cards -->
+                    <div class="row mb-4">
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card stats-card">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-uppercase mb-1">
+                                                今週の学習時間
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold">
+                                                <span th:text="${weeklyTotal}">0</span> 分
+                                            </div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-clock fa-2x text-white-50"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card stats-card">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-uppercase mb-1">
+                                                アクティブな目標
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold">
+                                                <span th:text="${activeGoals.size()}">0</span> 個
+                                            </div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-bullseye fa-2x text-white-50"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card stats-card">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-uppercase mb-1">
+                                                今日の学習時間
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold">
+                                                <span th:text="${todayLogs.isEmpty() ? 0 : todayLogs.stream().mapToInt(log -> log.getMinutesStudied()).sum()}">0</span> 分
+                                            </div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-calendar-day fa-2x text-white-50"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <div class="col-xl-3 col-md-6 mb-4">
+                            <div class="card stats-card">
+                                <div class="card-body">
+                                    <div class="row no-gutters align-items-center">
+                                        <div class="col mr-2">
+                                            <div class="text-xs font-weight-bold text-uppercase mb-1">
+                                                平均達成率
+                                            </div>
+                                            <div class="h5 mb-0 font-weight-bold">
+                                                <span th:text="${#numbers.formatDecimal(weeklyProgress.stream().mapToDouble(p -> p.getAchievementRate()).average().orElse(0), 1, 1)}">0</span>%
+                                            </div>
+                                        </div>
+                                        <div class="col-auto">
+                                            <i class="fas fa-percentage fa-2x text-white-50"></i>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Charts Row -->
+                    <div class="row">
+                        <!-- Weekly Progress Chart -->
+                        <div class="col-lg-8">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">
+                                        <i class="fas fa-chart-line me-2"></i>
+                                        今週の学習進捗
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div class="chart-container">
+                                        <canvas id="weeklyProgressChart"></canvas>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Active Goals -->
+                        <div class="col-lg-4">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">
+                                        <i class="fas fa-bullseye me-2"></i>
+                                        アクティブな目標
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div th:if="${activeGoals.isEmpty()}" class="text-center text-muted">
+                                        <i class="fas fa-info-circle fa-2x mb-3"></i>
+                                        <p>アクティブな学習目標がありません</p>
+                                        <a th:href="@{/goals(userId=${user.id})}" class="btn btn-primary btn-sm">
+                                            目標を作成
+                                        </a>
+                                    </div>
+                                    
+                                    <div th:each="goal : ${activeGoals}" class="mb-3">
+                                        <div class="d-flex justify-content-between align-items-center mb-1">
+                                            <strong th:text="${goal.subject}">科目名</strong>
+                                            <small class="text-muted" th:text="${goal.dailyTargetMinutes} + '分/日'">目標時間</small>
+                                        </div>
+                                        <div class="progress mb-2">
+                                            <div class="progress-bar" role="progressbar" style="width: 0%"></div>
+                                        </div>
+                                        <small class="text-muted">
+                                            開始日: <span th:text="${#temporals.format(goal.startDate, 'yyyy/MM/dd')}">開始日</span>
+                                        </small>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Today's Logs -->
+                    <div class="row mt-4">
+                        <div class="col-12">
+                            <div class="card">
+                                <div class="card-header">
+                                    <h5 class="card-title mb-0">
+                                        <i class="fas fa-calendar-day me-2"></i>
+                                        今日の学習記録
+                                    </h5>
+                                </div>
+                                <div class="card-body">
+                                    <div th:if="${todayLogs.isEmpty()}" class="text-center text-muted">
+                                        <i class="fas fa-clipboard-list fa-2x mb-3"></i>
+                                        <p>今日の学習記録がありません</p>
+                                        <a th:href="@{/log(userId=${user.id})}" class="btn btn-primary btn-sm">
+                                            記録を追加
+                                        </a>
+                                    </div>
+                                    
+                                    <div th:each="log : ${todayLogs}" class="border-bottom pb-2 mb-2">
+                                        <div class="d-flex justify-content-between align-items-center">
+                                            <div>
+                                                <strong th:text="${log.minutesStudied} + '分'">学習時間</strong>
+                                                <div th:if="${log.notes}" class="text-muted small mt-1" th:text="${log.notes}">メモ</div>
+                                            </div>
+                                            <small class="text-muted" th:text="${#temporals.format(log.createdAt, 'HH:mm')}">記録時間</small>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </main>
+        </div>
+    </div>
+    
+    <!-- Bootstrap JS -->
+    <script src="https://cdn.jsdelivr.net/npm/bootstrap@5.3.0/dist/js/bootstrap.bundle.min.js"></script>
+    
+    <!-- Chart.js -->
+    <script>
+        // Weekly Progress Chart
+        const ctx = document.getElementById('weeklyProgressChart').getContext('2d');
+        
+        const weeklyData = /*[[${weeklyProgress}]]*/ [];
+        const labels = weeklyData.map(item => item.dayOfWeek);
+        const data = weeklyData.map(item => item.minutesStudied);
+        const targetData = weeklyData.map(item => item.targetMinutes);
+        
+        new Chart(ctx, {
+            type: 'line',
+            data: {
+                labels: labels,
+                datasets: [{
+                    label: '学習時間（分）',
+                    data: data,
+                    borderColor: '#667eea',
+                    backgroundColor: 'rgba(102, 126, 234, 0.1)',
+                    tension: 0.4,
+                    fill: true
+                }, {
+                    label: '目標時間（分）',
+                    data: targetData,
+                    borderColor: '#764ba2',
+                    backgroundColor: 'rgba(118, 75, 162, 0.1)',
+                    borderDash: [5, 5],
+                    tension: 0.4
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: {
+                        position: 'top',
+                    }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        title: {
+                            display: true,
+                            text: '学習時間（分）'
+                        }
+                    }
+                }
+            }
+        });
+    </script>
+</body>
+</html> 

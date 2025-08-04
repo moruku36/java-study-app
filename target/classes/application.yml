@@ -1,0 +1,49 @@
+spring:
+  application:
+    name: java-study-app
+  
+  # データベース設定
+  datasource:
+    url: jdbc:h2:mem:studydb
+    driver-class-name: org.h2.Driver
+    username: sa
+    password: 
+  
+  # H2コンソール設定
+  h2:
+    console:
+      enabled: true
+      path: /h2-console
+  
+  # JPA設定
+  jpa:
+    hibernate:
+      ddl-auto: create-drop
+    show-sql: true
+    properties:
+      hibernate:
+        format_sql: true
+        dialect: org.hibernate.dialect.H2Dialect
+  
+  # Thymeleaf設定
+  thymeleaf:
+    cache: false
+    prefix: classpath:/templates/
+    suffix: .html
+  
+  # Spring Batch設定
+  batch:
+    job:
+      enabled: false
+    jdbc:
+      initialize-schema: always
+
+# サーバー設定
+server:
+  port: 8080
+
+# ログ設定
+logging:
+  level:
+    com.studyapp: DEBUG
+    org.springframework.batch: DEBUG 
