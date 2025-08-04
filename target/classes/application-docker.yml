@@ -1,0 +1,45 @@
+spring:
+  # データベース設定（Docker環境）
+  datasource:
+    driver-class-name: org.postgresql.Driver
+    url: ${DATABASE_URL:jdbc:postgresql://postgres:5432/studyapp}
+    username: ${DATABASE_USERNAME:studyuser}
+    password: ${DATABASE_PASSWORD:studypass}
+  
+  jpa:
+    hibernate:
+      ddl-auto: ${DDL_AUTO:update}
+    show-sql: ${SHOW_SQL:false}
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+        # コネクションプール設定
+        hikari:
+          maximum-pool-size: 10
+          minimum-idle: 2
+          connection-timeout: 30000
+          idle-timeout: 600000
+          max-lifetime: 1800000
+  
+  # Thymeleaf設定（Docker環境）
+  thymeleaf:
+    cache: ${THYMELEAF_CACHE:true}
+  
+  # H2コンソール無効化
+  h2:
+    console:
+      enabled: false
+
+# サーバー設定
+server:
+  port: ${PORT:8080}
+
+# ログ設定（Docker環境）
+logging:
+  level:
+    com.studyapp: ${LOG_LEVEL:INFO}
+    org.springframework: WARN
+    root: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n" 

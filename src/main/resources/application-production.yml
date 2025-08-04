@@ -2,7 +2,7 @@ spring:
   # データベース設定（本番環境）
   datasource:
     driver-class-name: org.postgresql.Driver
-  
+
   jpa:
     hibernate:
       ddl-auto: update
@@ -11,19 +11,60 @@ spring:
       hibernate:
         dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: false
-  
+        # パフォーマンス最適化
+        jdbc:
+          batch_size: 50
+        order_inserts: true
+        order_updates: true
+        # セカンドレベルキャッシュ無効化
+        cache:
+          use_second_level_cache: false
+          use_query_cache: false
+
   # Thymeleaf設定（本番環境）
   thymeleaf:
     cache: true
-  
+    mode: HTML
+
   # H2コンソール無効化
   h2:
     console:
       enabled: false
+
+  # バッチ処理設定（本番環境）
+  batch:
+    job:
+      enabled: true
+    jdbc:
+      initialize-schema: always
+
+# サーバー設定
+server:
+  port: ${PORT:8080}
+  compression:
+    enabled: true
+    mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
 
 # ログ設定（本番環境）
 logging:
   level:
     com.studyapp: INFO
     org.springframework: WARN
-    root: WARN 
+    org.hibernate: WARN
+    root: WARN
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# 管理エンドポイント設定
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics
+  endpoint:
+    health:
+      show-details: never
+  metrics:
+    export:
+      prometheus:
+        enabled: true 

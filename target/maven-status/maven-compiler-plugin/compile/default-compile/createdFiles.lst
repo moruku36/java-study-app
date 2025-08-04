@@ -16,3 +16,4 @@ com\studyapp\domain\LearningGoal.class
 com\studyapp\controller\WebController.class
 com\studyapp\controller\StudyLogController.class
 com\studyapp\domain\StudyLog.class
+com\studyapp\config\DatabaseConfig.class

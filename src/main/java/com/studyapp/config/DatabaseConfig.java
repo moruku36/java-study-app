@@ -16,7 +16,7 @@ public class DatabaseConfig {
     private String databaseUrl;
     
     @Bean
-    @Profile("!local")
+    @Profile("production")
     public DataSource dataSource() throws URISyntaxException {
         if (databaseUrl != null && !databaseUrl.isEmpty() && !databaseUrl.contains("h2")) {
             URI dbUri = new URI(databaseUrl);
@@ -41,20 +41,6 @@ public class DatabaseConfig {
             return dataSource;
         }
         
-        // ローカル環境用のH2データソースを返す
-        org.apache.tomcat.jdbc.pool.DataSource h2DataSource = new org.apache.tomcat.jdbc.pool.DataSource();
-        h2DataSource.setDriverClassName("org.h2.Driver");
-        h2DataSource.setUrl("jdbc:h2:mem:studydb");
-        h2DataSource.setUsername("sa");
-        h2DataSource.setPassword("");
-        h2DataSource.setTestOnBorrow(true);
-        h2DataSource.setTestWhileIdle(true);
-        h2DataSource.setTestOnReturn(true);
-        h2DataSource.setValidationQuery("SELECT 1");
-        h2DataSource.setMaxActive(10);
-        h2DataSource.setMinIdle(2);
-        h2DataSource.setMaxIdle(5);
-        
-        return h2DataSource;
+        return null;
     }
 } 
