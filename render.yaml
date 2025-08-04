@@ -34,4 +34,6 @@ services:
       - key: DATABASE_PASSWORD
         fromDatabase:
           name: study-app-db
-          property: password 
+          property: password
+      - key: DATABASE_DRIVER
+        value: org.postgresql.Driver 
