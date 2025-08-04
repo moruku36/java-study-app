@@ -2,7 +2,7 @@
 spring:
   # プロファイル設定
   profiles:
-    active: local
+    active: ${SPRING_PROFILES_ACTIVE:local}
   
   # 基本データベース設定（プロファイル別に上書き）
   datasource:
