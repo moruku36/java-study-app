@@ -1,6 +1,9 @@
 spring:
   # データベース設定（本番環境）
   datasource:
+    url: ${DATABASE_URL}
+    username: ${DATABASE_USERNAME}
+    password: ${DATABASE_PASSWORD}
     driver-class-name: org.postgresql.Driver
 
   jpa:
@@ -34,9 +37,9 @@ spring:
   # バッチ処理設定（本番環境）
   batch:
     job:
-      enabled: true
+      enabled: false  # 本番環境では無効化
     jdbc:
-      initialize-schema: always
+      initialize-schema: never
 
 # サーバー設定
 server:
