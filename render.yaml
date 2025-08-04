@@ -1,0 +1,19 @@
+services:
+  - type: web
+    name: java-study-app
+    env: java
+    buildCommand: ./mvnw clean package -DskipTests
+    startCommand: java -jar target/java-study-app-1.0.0.jar
+    envVars:
+      - key: JAVA_VERSION
+        value: 17
+      - key: SPRING_PROFILES_ACTIVE
+        value: production
+      - key: DDL_AUTO
+        value: update
+      - key: SHOW_SQL
+        value: false
+      - key: THYMELEAF_CACHE
+        value: true
+      - key: LOG_LEVEL
+        value: INFO 

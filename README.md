@@ -22,25 +22,64 @@ Spring Boot + Thymeleaf + H2データベースを使用した学習進捗管理W
 
 ### 前提条件
 - Java 17以上
-- Maven 3.6以上
+- Maven 3.6以上（またはMaven Wrapper使用）
 
-### 1. プロジェクトのクローン
+### ローカル環境での実行
+
+#### 1. プロジェクトのクローン
 ```bash
-git clone <repository-url>
+git clone https://github.com/moruku36/java-study-app.git
 cd java-study-app
 ```
 
-### 2. アプリケーションの起動
+#### 2. アプリケーションの起動
 ```bash
+# Maven Wrapperを使用（推奨）
+./mvnw spring-boot:run
+
+# またはMavenがインストールされている場合
 mvn spring-boot:run
 ```
 
-### 3. アクセス
+#### 3. アクセス
 - アプリケーション: http://localhost:8080
 - H2コンソール: http://localhost:8080/h2-console
   - JDBC URL: `jdbc:h2:mem:studydb`
   - ユーザー名: `sa`
   - パスワード: (空)
+
+### Render.comでのデプロイ
+
+#### 1. Render.comアカウント作成
+- [Render.com](https://render.com)にアクセスしてアカウント作成
+- GitHubアカウントと連携
+
+#### 2. 新しいWeb Service作成
+- Dashboard → "New +" → "Web Service"
+- GitHubリポジトリを選択: `moruku36/java-study-app`
+
+#### 3. サービス設定
+- **Name**: `java-study-app`
+- **Environment**: `Java`
+- **Build Command**: `./mvnw clean package -DskipTests`
+- **Start Command**: `java -jar target/java-study-app-1.0.0.jar`
+- **Java Version**: `17`
+
+#### 4. 環境変数設定（オプション）
+- `SPRING_PROFILES_ACTIVE`: `production`
+- `DDL_AUTO`: `update`
+- `SHOW_SQL`: `false`
+- `THYMELEAF_CACHE`: `true`
+- `LOG_LEVEL`: `INFO`
+
+#### 5. PostgreSQLデータベース追加（推奨）
+- "New +" → "PostgreSQL"
+- データベース名を設定
+- 環境変数`DATABASE_URL`が自動設定される
+
+#### 6. デプロイ
+- "Create Web Service"をクリック
+- ビルドとデプロイが自動実行される
 
 ## 使用方法
 

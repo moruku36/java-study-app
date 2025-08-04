@@ -1,0 +1,29 @@
+spring:
+  # データベース設定（本番環境）
+  datasource:
+    driver-class-name: org.postgresql.Driver
+  
+  jpa:
+    hibernate:
+      ddl-auto: update
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
+  
+  # Thymeleaf設定（本番環境）
+  thymeleaf:
+    cache: true
+  
+  # H2コンソール無効化
+  h2:
+    console:
+      enabled: false
+
+# ログ設定（本番環境）
+logging:
+  level:
+    com.studyapp: INFO
+    org.springframework: WARN
+    root: WARN 
