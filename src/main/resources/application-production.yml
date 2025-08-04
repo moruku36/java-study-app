@@ -1,9 +1,9 @@
 spring:
   # データベース設定（本番環境 - PostgreSQL）
   datasource:
-    url: ${DATABASE_URL}
-    username: ${DATABASE_USERNAME}
-    password: ${DATABASE_PASSWORD}
+    url: jdbc:postgresql://dpg-d285h0ggjchc738ul2s0-a.oregon-postgres.render.com/mydb_t10f?sslmode=require
+    username: mydb_t10f_user
+    password: eGZOMQiK0TTp9MBUxDPdF63PCip5fa0A
     driver-class-name: org.postgresql.Driver
     # HikariCP設定
     hikari:
@@ -14,6 +14,10 @@ spring:
       max-lifetime: 900000
       connection-test-query: SELECT 1
       validation-timeout: 3000
+      # PostgreSQL接続設定
+      data-source-properties:
+        ssl: true
+        sslmode: require
 
   jpa:
     hibernate:
