@@ -1,7 +1,7 @@
 spring:
   # データベース設定（本番環境 - PostgreSQL）
   datasource:
-    url: ${DATABASE_URL}
+    url: ${DATABASE_URL}?sslmode=require
     username: ${DATABASE_USERNAME}
     password: ${DATABASE_PASSWORD}
     driver-class-name: org.postgresql.Driver
@@ -33,6 +33,10 @@ spring:
         cache:
           use_second_level_cache: false
           use_query_cache: false
+      # PostgreSQL SSL設定
+      connection:
+        ssl: true
+        sslmode: require
 
   # Thymeleaf設定（本番環境）
   thymeleaf:
