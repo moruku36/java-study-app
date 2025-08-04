@@ -1,5 +1,5 @@
 # マルチステージビルドを使用
-FROM maven:3.9.5-openjdk-17 AS build
+FROM maven:3.9.6-eclipse-temurin-17 AS build
 
 # 作業ディレクトリを設定
 WORKDIR /app
@@ -22,7 +22,7 @@ COPY src src
 RUN ./mvnw clean package -DskipTests
 
 # 実行用イメージ
-FROM openjdk:17-jre-slim
+FROM eclipse-temurin:17-jre-alpine
 
 # 作業ディレクトリを設定
 WORKDIR /app
@@ -32,6 +32,9 @@ COPY --from=build /app/target/java-study-app-1.0.0.jar app.jar
 
 # ポート8080を公開
 EXPOSE 8080
+
+# curlをインストール（ヘルスチェック用）
+RUN apk add --no-cache curl
 
 # ヘルスチェックを追加
 HEALTHCHECK --interval=30s --timeout=3s --start-period=60s --retries=3 \
