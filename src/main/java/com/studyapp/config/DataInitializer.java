@@ -7,6 +7,7 @@ import com.studyapp.service.LearningGoalService;
 import com.studyapp.service.StudyLogService;
 import com.studyapp.service.UserService;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.beans.factory.annotation.Value;
 import org.springframework.boot.CommandLineRunner;
 import org.springframework.stereotype.Component;
 
@@ -14,6 +15,9 @@ import java.time.LocalDate;
 
 @Component
 public class DataInitializer implements CommandLineRunner {
+    
+    @Value("${spring.data.init.enabled:true}")
+    private boolean dataInitEnabled;
     
     @Autowired
     private UserService userService;
@@ -26,14 +30,33 @@ public class DataInitializer implements CommandLineRunner {
     
     @Override
     public void run(String... args) throws Exception {
-        // サンプルユーザーを作成
-        User sampleUser = createSampleUser();
+        if (!dataInitEnabled) {
+            System.out.println("データ初期化が無効化されています");
+            return;
+        }
         
-        // サンプル学習目標を作成
-        createSampleGoals(sampleUser);
-        
-        // サンプル学習記録を作成
-        createSampleStudyLogs(sampleUser);
+        try {
+            System.out.println("=== データ初期化開始 ===");
+            
+            // サンプルユーザーを作成
+            User sampleUser = createSampleUser();
+            System.out.println("ユーザー作成完了: " + sampleUser.getUsername());
+            
+            // サンプル学習目標を作成
+            createSampleGoals(sampleUser);
+            System.out.println("学習目標作成完了");
+            
+            // サンプル学習記録を作成
+            createSampleStudyLogs(sampleUser);
+            System.out.println("学習記録作成完了");
+            
+            System.out.println("=== データ初期化完了 ===");
+        } catch (Exception e) {
+            System.err.println("データ初期化エラー: " + e.getMessage());
+            e.printStackTrace();
+            // エラーが発生してもアプリケーションを継続
+            throw e;
+        }
     }
     
     private User createSampleUser() {

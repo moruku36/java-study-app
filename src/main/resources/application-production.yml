@@ -60,6 +60,11 @@ spring:
     init:
       mode: always
       continue-on-error: true
+  
+  # データ初期化無効化（本番環境）
+  data:
+    init:
+      enabled: false
 
 # サーバー設定
 server:
