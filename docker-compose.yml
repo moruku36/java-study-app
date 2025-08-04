@@ -1,0 +1,51 @@
+version: '3.8'
+
+services:
+  # PostgreSQLデータベース
+  postgres:
+    image: postgres:15-alpine
+    container_name: study-app-db
+    environment:
+      POSTGRES_DB: studyapp
+      POSTGRES_USER: studyuser
+      POSTGRES_PASSWORD: studypass
+    volumes:
+      - postgres_data:/var/lib/postgresql/data
+    ports:
+      - "5432:5432"
+    networks:
+      - study-app-network
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U studyuser -d studyapp"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+
+  # Spring Bootアプリケーション
+  app:
+    build: .
+    container_name: study-app
+    environment:
+      SPRING_PROFILES_ACTIVE: docker
+      DATABASE_URL: jdbc:postgresql://postgres:5432/studyapp
+      DATABASE_USERNAME: studyuser
+      DATABASE_PASSWORD: studypass
+      DDL_AUTO: update
+      SHOW_SQL: false
+      THYMELEAF_CACHE: true
+      LOG_LEVEL: INFO
+    ports:
+      - "8080:8080"
+    depends_on:
+      postgres:
+        condition: service_healthy
+    networks:
+      - study-app-network
+    restart: unless-stopped
+
+volumes:
+  postgres_data:
+
+networks:
+  study-app-network:
+    driver: bridge 

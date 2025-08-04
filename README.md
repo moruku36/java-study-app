@@ -48,6 +48,42 @@ mvn spring-boot:run
   - ユーザー名: `sa`
   - パスワード: (空)
 
+### Dockerでの実行
+
+#### 1. 前提条件
+- Docker Desktop がインストールされていること
+- Docker Compose が利用可能であること
+
+#### 2. アプリケーションの起動
+```bash
+# 本番環境用（PostgreSQL + アプリケーション）
+docker-compose up -d
+
+# 開発環境用（PostgreSQL + pgAdmin）
+docker-compose -f docker-compose.dev.yml up -d
+```
+
+#### 3. アクセス
+- **アプリケーション**: http://localhost:8080
+- **pgAdmin（開発環境）**: http://localhost:5050
+  - メール: `admin@studyapp.com`
+  - パスワード: `admin123`
+
+#### 4. 便利なコマンド
+```bash
+# ログを確認
+docker-compose logs -f app
+
+# アプリケーションを停止
+docker-compose down
+
+# データベースも含めて完全に削除
+docker-compose down -v
+
+# イメージを再ビルド
+docker-compose build --no-cache
+```
+
 ### Render.comでのデプロイ
 
 #### 1. Render.comアカウント作成

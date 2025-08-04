@@ -1,0 +1,35 @@
+# Git関連
+.git
+.gitignore
+
+# IDE関連
+.idea
+.vscode
+*.iml
+
+# ビルド成果物
+target/
+!target/*.jar
+
+# ログファイル
+*.log
+
+# OS関連
+.DS_Store
+Thumbs.db
+
+# 一時ファイル
+*.tmp
+*.temp
+
+# テスト関連
+src/test/
+
+# ドキュメント
+README.md
+*.md
+
+# Docker関連
+Dockerfile
+.dockerignore
+docker-compose.yml 
