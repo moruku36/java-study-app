@@ -1,9 +1,4 @@
 services:
-  - type: pserv
-    name: study-app-db
-    env: postgresql
-    plan: free
-
   - type: web
     name: java-study-app
     env: java
@@ -23,17 +18,4 @@ services:
         value: true
       - key: LOG_LEVEL
         value: INFO
-      - key: DATABASE_URL
-        fromDatabase:
-          name: study-app-db
-          property: connectionString
-      - key: DATABASE_USERNAME
-        fromDatabase:
-          name: study-app-db
-          property: user
-      - key: DATABASE_PASSWORD
-        fromDatabase:
-          name: study-app-db
-          property: password
-      - key: DATABASE_DRIVER
-        value: org.postgresql.Driver 
+ 

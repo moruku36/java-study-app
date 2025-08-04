@@ -1,57 +1,37 @@
 spring:
-  # データベース設定（本番環境）
+  # データベース設定（本番環境 - H2インメモリ）
   datasource:
-    url: ${DATABASE_URL}
-    username: ${DATABASE_USERNAME}
-    password: ${DATABASE_PASSWORD}
-    driver-class-name: org.postgresql.Driver
-    # HikariCP設定
-    hikari:
-      maximum-pool-size: 5
-      minimum-idle: 1
-      connection-timeout: 60000
-      idle-timeout: 300000
-      max-lifetime: 900000
-      connection-test-query: SELECT 1
-      validation-timeout: 3000
+    url: jdbc:h2:mem:studydb;DB_CLOSE_DELAY=-1;DB_CLOSE_ON_EXIT=FALSE
+    username: sa
+    password:
+    driver-class-name: org.h2.Driver
 
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: create-drop
     show-sql: false
-    open-in-view: false
     properties:
       hibernate:
+        dialect: org.hibernate.dialect.H2Dialect
         format_sql: false
-        # 接続設定
-        connection:
-          provider_disables_autocommit: true
-        # パフォーマンス最適化
-        jdbc:
-          batch_size: 50
-        order_inserts: true
-        order_updates: true
-        # セカンドレベルキャッシュ無効化
-        cache:
-          use_second_level_cache: false
-          use_query_cache: false
 
   # Thymeleaf設定（本番環境）
   thymeleaf:
     cache: true
     mode: HTML
 
-  # H2コンソール無効化
+  # H2コンソール有効化（デバッグ用）
   h2:
     console:
-      enabled: false
+      enabled: true
+      path: /h2-console
 
   # バッチ処理設定（本番環境）
   batch:
     job:
       enabled: false  # 本番環境では無効化
     jdbc:
-      initialize-schema: never
+      initialize-schema: always
 
 # サーバー設定
 server:
