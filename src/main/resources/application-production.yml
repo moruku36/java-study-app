@@ -7,13 +7,13 @@ spring:
     driver-class-name: org.postgresql.Driver
     # HikariCP設定
     hikari:
-      maximum-pool-size: 5
+      maximum-pool-size: 3
       minimum-idle: 1
-      connection-timeout: 60000
+      connection-timeout: 30000
       idle-timeout: 300000
       max-lifetime: 900000
       connection-test-query: SELECT 1
-      validation-timeout: 3000
+      validation-timeout: 5000
       # PostgreSQL接続設定
       data-source-properties:
         ssl: true
@@ -22,7 +22,7 @@ spring:
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: false
+    show-sql: true
     open-in-view: false
     properties:
       hibernate:
@@ -53,6 +53,11 @@ spring:
       enabled: false  # 本番環境では無効化
     jdbc:
       initialize-schema: always
+  
+  # データベース初期化設定
+  sql:
+    init:
+      mode: always
 
 # サーバー設定
 server:
@@ -64,10 +69,10 @@ server:
 # ログ設定（本番環境）
 logging:
   level:
-    com.studyapp: INFO
-    org.springframework: WARN
-    org.hibernate: WARN
-    root: WARN
+    com.studyapp: DEBUG
+    org.springframework: INFO
+    org.hibernate: INFO
+    root: INFO
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
 
