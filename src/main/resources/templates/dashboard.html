@@ -197,7 +197,7 @@
                                                 今日の学習時間
                                             </div>
                                             <div class="h5 mb-0 font-weight-bold">
-                                                <span th:text="${todayLogs.isEmpty() ? 0 : todayLogs.stream().mapToInt(log -> log.getMinutesStudied()).sum()}">0</span> 分
+                                                <span th:text="${todayLogs != null and !todayLogs.isEmpty() ? todayLogs.stream().mapToInt(log -> log.getMinutesStudied() != null ? log.getMinutesStudied() : 0).sum() : 0}">0</span> 分
                                             </div>
                                         </div>
                                         <div class="col-auto">
@@ -217,7 +217,7 @@
                                                 平均達成率
                                             </div>
                                             <div class="h5 mb-0 font-weight-bold">
-                                                <span th:text="${#numbers.formatDecimal(weeklyProgress.stream().mapToDouble(p -> p.getAchievementRate()).average().orElse(0), 1, 1)}">0</span>%
+                                                <span th:text="${weeklyProgress != null and !weeklyProgress.isEmpty() ? #numbers.formatDecimal(weeklyProgress.stream().mapToDouble(p -> p.getAchievementRate() != null ? p.getAchievementRate() : 0).average().orElse(0), 1, 1) : '0.0'}">0</span>%
                                             </div>
                                         </div>
                                         <div class="col-auto">
@@ -258,7 +258,7 @@
                                     </h5>
                                 </div>
                                 <div class="card-body">
-                                    <div th:if="${activeGoals.isEmpty()}" class="text-center text-muted">
+                                    <div th:if="${activeGoals == null or activeGoals.isEmpty()}" class="text-center text-muted">
                                         <i class="fas fa-info-circle fa-2x mb-3"></i>
                                         <p>アクティブな学習目標がありません</p>
                                         <a th:href="@{/goals(userId=${user.id})}" class="btn btn-primary btn-sm">
@@ -266,16 +266,16 @@
                                         </a>
                                     </div>
                                     
-                                    <div th:each="goal : ${activeGoals}" class="mb-3">
+                                    <div th:if="${activeGoals != null}" th:each="goal : ${activeGoals}" class="mb-3">
                                         <div class="d-flex justify-content-between align-items-center mb-1">
-                                            <strong th:text="${goal.subject}">科目名</strong>
-                                            <small class="text-muted" th:text="${goal.dailyTargetMinutes} + '分/日'">目標時間</small>
+                                            <strong th:text="${goal.subject != null ? goal.subject : '未設定'}">科目名</strong>
+                                            <small class="text-muted" th:text="${goal.dailyTargetMinutes != null ? goal.dailyTargetMinutes : 0} + '分/日'">目標時間</small>
                                         </div>
                                         <div class="progress mb-2">
                                             <div class="progress-bar" role="progressbar" style="width: 0%"></div>
                                         </div>
                                         <small class="text-muted">
-                                            開始日: <span th:text="${#temporals.format(goal.startDate, 'yyyy/MM/dd')}">開始日</span>
+                                            開始日: <span th:text="${goal.startDate != null ? #temporals.format(goal.startDate, 'yyyy/MM/dd') : '未設定'}">開始日</span>
                                         </small>
                                     </div>
                                 </div>
@@ -294,7 +294,7 @@
                                     </h5>
                                 </div>
                                 <div class="card-body">
-                                    <div th:if="${todayLogs.isEmpty()}" class="text-center text-muted">
+                                    <div th:if="${todayLogs == null or todayLogs.isEmpty()}" class="text-center text-muted">
                                         <i class="fas fa-clipboard-list fa-2x mb-3"></i>
                                         <p>今日の学習記録がありません</p>
                                         <a th:href="@{/log(userId=${user.id})}" class="btn btn-primary btn-sm">
@@ -302,13 +302,13 @@
                                         </a>
                                     </div>
                                     
-                                    <div th:each="log : ${todayLogs}" class="border-bottom pb-2 mb-2">
+                                    <div th:if="${todayLogs != null}" th:each="log : ${todayLogs}" class="border-bottom pb-2 mb-2">
                                         <div class="d-flex justify-content-between align-items-center">
                                             <div>
-                                                <strong th:text="${log.minutesStudied} + '分'">学習時間</strong>
-                                                <div th:if="${log.notes}" class="text-muted small mt-1" th:text="${log.notes}">メモ</div>
+                                                <strong th:text="${log.minutesStudied != null ? log.minutesStudied : 0} + '分'">学習時間</strong>
+                                                <div th:if="${log.notes != null and log.notes != ''}" class="text-muted small mt-1" th:text="${log.notes}">メモ</div>
                                             </div>
-                                            <small class="text-muted" th:text="${#temporals.format(log.createdAt, 'HH:mm')}">記録時間</small>
+                                            <small class="text-muted" th:text="${log.createdAt != null ? #temporals.format(log.createdAt, 'HH:mm') : '--:--'}">記録時間</small>
                                         </div>
                                     </div>
                                 </div>
@@ -329,9 +329,9 @@
         const ctx = document.getElementById('weeklyProgressChart').getContext('2d');
         
         const weeklyData = /*[[${weeklyProgress}]]*/ [];
-        const labels = weeklyData.map(item => item.dayOfWeek);
-        const data = weeklyData.map(item => item.minutesStudied);
-        const targetData = weeklyData.map(item => item.targetMinutes);
+        const labels = weeklyData ? weeklyData.map(item => item.dayOfWeek || '') : [];
+        const data = weeklyData ? weeklyData.map(item => item.minutesStudied || 0) : [];
+        const targetData = weeklyData ? weeklyData.map(item => item.targetMinutes || 0) : [];
         
         new Chart(ctx, {
             type: 'line',

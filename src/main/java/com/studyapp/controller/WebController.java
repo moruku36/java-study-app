@@ -35,44 +35,55 @@ public class WebController {
     
     @GetMapping("/dashboard")
     public String dashboard(@RequestParam(defaultValue = "1") Long userId, Model model) {
-        // ユーザー情報を取得
-        User user = userService.findById(userId).orElse(null);
-        if (user == null) {
-            // ユーザーが存在しない場合は最初のユーザーを取得
-            List<User> users = userService.findAll();
-            if (!users.isEmpty()) {
-                user = users.get(0);
-                userId = user.getId();
-            } else {
-                // ユーザーが存在しない場合はデフォルトユーザーを作成
-                user = new User();
-                user.setUsername("sample_user");
-                user.setEmail("sample@example.com");
-                user.setPassword("password123");
-                user = userService.save(user);
-                userId = user.getId();
+        try {
+            // ユーザー情報を取得
+            User user = userService.findById(userId).orElse(null);
+            if (user == null) {
+                // ユーザーが存在しない場合は最初のユーザーを取得
+                List<User> users = userService.findAll();
+                if (!users.isEmpty()) {
+                    user = users.get(0);
+                    userId = user.getId();
+                } else {
+                    // ユーザーが存在しない場合はデフォルトユーザーを作成
+                    user = new User();
+                    user.setUsername("sample_user");
+                    user.setEmail("sample@example.com");
+                    user.setPassword("password123");
+                    user = userService.save(user);
+                    userId = user.getId();
+                }
             }
+            model.addAttribute("user", user);
+            
+            // アクティブな学習目標を取得
+            List<LearningGoal> activeGoals = learningGoalService.findActiveGoalsByUserId(userId);
+            model.addAttribute("activeGoals", activeGoals != null ? activeGoals : new ArrayList<>());
+            
+            // 週次進捗を取得
+            List<WeeklyProgressDto> weeklyProgress = studyLogService.getWeeklyProgress(userId);
+            model.addAttribute("weeklyProgress", weeklyProgress != null ? weeklyProgress : new ArrayList<>());
+            
+            // 今日の学習記録を取得
+            LocalDate today = LocalDate.now();
+            List<StudyLog> todayLogs = studyLogService.findByUserIdAndDateRange(userId, today, today);
+            model.addAttribute("todayLogs", todayLogs != null ? todayLogs : new ArrayList<>());
+            
+            // 今週の総学習時間を計算
+            Integer weeklyTotal = studyLogService.getTotalStudyMinutes(userId, 
+                today.with(java.time.DayOfWeek.SUNDAY), 
+                today.with(java.time.DayOfWeek.SATURDAY));
+            model.addAttribute("weeklyTotal", weeklyTotal != null ? weeklyTotal : 0);
+            
+        } catch (Exception e) {
+            // エラーが発生した場合のフォールバック処理
+            model.addAttribute("error", "ダッシュボードの読み込み中にエラーが発生しました: " + e.getMessage());
+            model.addAttribute("user", new User());
+            model.addAttribute("activeGoals", new ArrayList<>());
+            model.addAttribute("weeklyProgress", new ArrayList<>());
+            model.addAttribute("todayLogs", new ArrayList<>());
+            model.addAttribute("weeklyTotal", 0);
         }
-        model.addAttribute("user", user);
-        
-        // アクティブな学習目標を取得
-        List<LearningGoal> activeGoals = learningGoalService.findActiveGoalsByUserId(userId);
-        model.addAttribute("activeGoals", activeGoals);
-        
-        // 週次進捗を取得
-        List<WeeklyProgressDto> weeklyProgress = studyLogService.getWeeklyProgress(userId);
-        model.addAttribute("weeklyProgress", weeklyProgress);
-        
-        // 今日の学習記録を取得
-        LocalDate today = LocalDate.now();
-        List<StudyLog> todayLogs = studyLogService.findByUserIdAndDateRange(userId, today, today);
-        model.addAttribute("todayLogs", todayLogs);
-        
-        // 今週の総学習時間を計算
-        Integer weeklyTotal = studyLogService.getTotalStudyMinutes(userId, 
-            today.with(java.time.DayOfWeek.SUNDAY), 
-            today.with(java.time.DayOfWeek.SATURDAY));
-        model.addAttribute("weeklyTotal", weeklyTotal != null ? weeklyTotal : 0);
         
         return "dashboard";
     }
@@ -178,6 +189,37 @@ public class WebController {
     public String registerForm(Model model) {
         model.addAttribute("user", new User());
         return "register";
+    }
+    
+    @PostMapping("/log")
+    public String saveStudyLog(@RequestParam Long userId,
+                              @RequestParam String studyDate,
+                              @RequestParam Integer minutesStudied,
+                              @RequestParam(required = false) String notes,
+                              Model model) {
+        try {
+            User user = userService.findById(userId).orElse(null);
+            if (user == null) {
+                model.addAttribute("error", "ユーザーが見つかりません");
+                return "log";
+            }
+            
+            LocalDate date = LocalDate.parse(studyDate);
+            StudyLog savedLog = studyLogService.logStudy(userId, date, minutesStudied, notes);
+            
+            model.addAttribute("success", "学習記録を保存しました");
+            model.addAttribute("user", user);
+            model.addAttribute("studyLog", new StudyLog());
+            model.addAttribute("today", LocalDate.now());
+            
+        } catch (Exception e) {
+            model.addAttribute("error", "学習記録の保存中にエラーが発生しました: " + e.getMessage());
+            model.addAttribute("user", userService.findById(userId).orElse(null));
+            model.addAttribute("studyLog", new StudyLog());
+            model.addAttribute("today", LocalDate.now());
+        }
+        
+        return "log";
     }
     
     @PostMapping("/register")

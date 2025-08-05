@@ -75,37 +75,49 @@ public class StudyLogService {
     }
     
     public List<WeeklyProgressDto> getWeeklyProgress(Long userId) {
-        LocalDate today = LocalDate.now();
-        LocalDate weekStart = today.with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.SUNDAY));
-        LocalDate weekEnd = today.with(TemporalAdjusters.nextOrSame(java.time.DayOfWeek.SATURDAY));
-        
-        List<WeeklyProgressDto> weeklyProgress = new ArrayList<>();
-        
-        // アクティブな目標を取得
-        List<LearningGoal> activeGoals = learningGoalRepository.findActiveGoalsByUserId(userId);
-        Integer targetMinutes = activeGoals.stream()
-                .mapToInt(LearningGoal::getDailyTargetMinutes)
-                .sum();
-        
-        // 週の各日について進捗を計算
-        for (LocalDate date = weekStart; !date.isAfter(weekEnd); date = date.plusDays(1)) {
-            Integer minutesStudied = studyLogRepository.sumMinutesByUserIdAndStudyDate(userId, date);
-            if (minutesStudied == null) {
-                minutesStudied = 0;
+        try {
+            LocalDate today = LocalDate.now();
+            LocalDate weekStart = today.with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.SUNDAY));
+            LocalDate weekEnd = today.with(TemporalAdjusters.nextOrSame(java.time.DayOfWeek.SATURDAY));
+            
+            List<WeeklyProgressDto> weeklyProgress = new ArrayList<>();
+            
+            // アクティブな目標を取得
+            List<LearningGoal> activeGoals = learningGoalRepository.findActiveGoalsByUserId(userId);
+            Integer targetMinutes = activeGoals != null ? activeGoals.stream()
+                    .mapToInt(goal -> goal.getDailyTargetMinutes() != null ? goal.getDailyTargetMinutes() : 0)
+                    .sum() : 0;
+            
+            // 週の各日について進捗を計算
+            for (LocalDate date = weekStart; !date.isAfter(weekEnd); date = date.plusDays(1)) {
+                Integer minutesStudied = studyLogRepository.sumMinutesByUserIdAndStudyDate(userId, date);
+                if (minutesStudied == null) {
+                    minutesStudied = 0;
+                }
+                
+                WeeklyProgressDto progress = new WeeklyProgressDto(date, minutesStudied, targetMinutes);
+                weeklyProgress.add(progress);
             }
             
-            WeeklyProgressDto progress = new WeeklyProgressDto(date, minutesStudied, targetMinutes);
-            weeklyProgress.add(progress);
+            return weeklyProgress;
+        } catch (Exception e) {
+            System.err.println("週次進捗取得エラー: " + e.getMessage());
+            e.printStackTrace();
+            return new ArrayList<>();
         }
-        
-        return weeklyProgress;
     }
     
     public Integer getTotalStudyMinutes(Long userId, LocalDate startDate, LocalDate endDate) {
-        List<StudyLog> logs = studyLogRepository.findByUserIdAndStudyDateBetween(userId, startDate, endDate);
-        return logs.stream()
-                .mapToInt(log -> log.getMinutesStudied() != null ? log.getMinutesStudied() : 0)
-                .sum();
+        try {
+            List<StudyLog> logs = studyLogRepository.findByUserIdAndStudyDateBetween(userId, startDate, endDate);
+            return logs != null ? logs.stream()
+                    .mapToInt(log -> log.getMinutesStudied() != null ? log.getMinutesStudied() : 0)
+                    .sum() : 0;
+        } catch (Exception e) {
+            System.err.println("総学習時間取得エラー: " + e.getMessage());
+            e.printStackTrace();
+            return 0;
+        }
     }
     
     public void deleteById(Long id) {

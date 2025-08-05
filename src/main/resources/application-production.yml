@@ -5,38 +5,30 @@ spring:
     username: mydb_t10f_user
     password: eGZOMQiK0TTp9MBUxDPdF63PCip5fa0A
     driver-class-name: org.postgresql.Driver
-    # HikariCP設定
+    # 接続プール設定
     hikari:
       maximum-pool-size: 3
       minimum-idle: 1
-      connection-timeout: 60000
+      connection-timeout: 20000
       idle-timeout: 300000
-      max-lifetime: 900000
+      max-lifetime: 600000
       connection-test-query: SELECT 1
-      validation-timeout: 10000
-      # PostgreSQL接続設定
-      data-source-properties:
-        ssl: true
-        sslmode: require
+      validation-timeout: 3000
+      leak-detection-threshold: 30000
 
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: true
-    open-in-view: false
+    show-sql: false
     properties:
       hibernate:
-        format_sql: true
+        format_sql: false
         connection:
           provider_disables_autocommit: true
         jdbc:
-          batch_size: 50
-          batch_versioned_data: true
+          batch_size: 20
         order_inserts: true
         order_updates: true
-        cache:
-          use_second_level_cache: false
-          use_query_cache: false
 
   # Thymeleaf設定（本番環境）
   thymeleaf:
@@ -48,23 +40,10 @@ spring:
     console:
       enabled: false
 
-  # バッチ処理設定（本番環境）
-  batch:
-    job:
-      enabled: false  # 本番環境では無効化
-    jdbc:
-      initialize-schema: always
-  
-  # データベース初期化設定
-  sql:
-    init:
-      mode: always
-      continue-on-error: true
-  
-  # データ初期化有効化（本番環境 - デバッグ用）
+  # データ初期化無効化（本番環境 - 起動高速化）
   data:
     init:
-      enabled: true
+      enabled: false
 
 # サーバー設定
 server:
@@ -72,34 +51,36 @@ server:
   compression:
     enabled: true
     mime-types: text/html,text/xml,text/plain,text/css,text/javascript,application/javascript,application/json
-
-# デバッグモード有効化
-debug: true
+  tomcat:
+    threads:
+      max: 50
+      min-spare: 10
+    connection-timeout: 20000
 
 # ログ設定（本番環境）
 logging:
   level:
     com.studyapp: DEBUG
-    org.springframework: DEBUG
-    org.hibernate: DEBUG
+    org.springframework: INFO
+    org.hibernate.SQL: DEBUG
+    org.hibernate.type.descriptor.sql.BasicBinder: TRACE
+    org.springframework.orm.jpa: DEBUG
+    org.springframework.transaction: DEBUG
     org.springframework.boot: DEBUG
     org.springframework.context: DEBUG
     org.springframework.beans: DEBUG
-    root: DEBUG
+    root: INFO
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
-  exception-conversion-word: "%wEx"
 
 # 管理エンドポイント設定
 management:
   endpoints:
     web:
       exposure:
-        include: health,info,metrics
+        include: health,info
+      base-path: /actuator
   endpoint:
     health:
-      show-details: never
-  metrics:
-    export:
-      prometheus:
-        enabled: true 
+      show-details: when-authorized
+      show-components: always 
