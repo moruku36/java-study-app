@@ -9,11 +9,11 @@ spring:
     hikari:
       maximum-pool-size: 3
       minimum-idle: 1
-      connection-timeout: 30000
+      connection-timeout: 60000
       idle-timeout: 300000
       max-lifetime: 900000
       connection-test-query: SELECT 1
-      validation-timeout: 5000
+      validation-timeout: 10000
       # PostgreSQL接続設定
       data-source-properties:
         ssl: true
@@ -82,9 +82,13 @@ logging:
     com.studyapp: DEBUG
     org.springframework: DEBUG
     org.hibernate: DEBUG
+    org.springframework.boot: DEBUG
+    org.springframework.context: DEBUG
+    org.springframework.beans: DEBUG
     root: DEBUG
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  exception-conversion-word: "%wEx"
 
 # 管理エンドポイント設定
 management:

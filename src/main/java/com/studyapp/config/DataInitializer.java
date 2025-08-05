@@ -53,9 +53,10 @@ public class DataInitializer implements CommandLineRunner {
             System.out.println("=== データ初期化完了 ===");
         } catch (Exception e) {
             System.err.println("データ初期化エラー: " + e.getMessage());
+            System.err.println("エラーの詳細:");
             e.printStackTrace();
-            // エラーが発生してもアプリケーションを継続
-            throw e;
+            System.err.println("アプリケーションを継続します...");
+            // エラーが発生してもアプリケーションを継続（エラーを再スローしない）
         }
     }
     
