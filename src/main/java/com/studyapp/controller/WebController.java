@@ -12,6 +12,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
+import com.studyapp.constant.AppConstants;
 import java.time.LocalDate;
 import java.util.List;
 import java.util.ArrayList;
@@ -19,14 +20,17 @@ import java.util.ArrayList;
 @Controller
 public class WebController {
     
-    @Autowired
-    private UserService userService;
+    private final UserService userService;
+    private final LearningGoalService learningGoalService;
+    private final StudyLogService studyLogService;
     
-    @Autowired
-    private LearningGoalService learningGoalService;
-    
-    @Autowired
-    private StudyLogService studyLogService;
+    public WebController(UserService userService, 
+                        LearningGoalService learningGoalService, 
+                        StudyLogService studyLogService) {
+        this.userService = userService;
+        this.learningGoalService = learningGoalService;
+        this.studyLogService = studyLogService;
+    }
     
     @GetMapping("/")
     public String index() {
@@ -36,24 +40,7 @@ public class WebController {
     @GetMapping("/dashboard")
     public String dashboard(@RequestParam(defaultValue = "1") Long userId, Model model) {
         try {
-            // ユーザー情報を取得
-            User user = userService.findById(userId).orElse(null);
-            if (user == null) {
-                // ユーザーが存在しない場合は最初のユーザーを取得
-                List<User> users = userService.findAll();
-                if (!users.isEmpty()) {
-                    user = users.get(0);
-                    userId = user.getId();
-                } else {
-                    // ユーザーが存在しない場合はデフォルトユーザーを作成
-                    user = new User();
-                    user.setUsername("sample_user");
-                    user.setEmail("sample@example.com");
-                    user.setPassword("password123");
-                    user = userService.save(user);
-                    userId = user.getId();
-                }
-            }
+            User user = getUserOrCreateDefault(userId);
             model.addAttribute("user", user);
             
             // アクティブな学習目標を取得
@@ -77,7 +64,7 @@ public class WebController {
             
         } catch (Exception e) {
             // エラーが発生した場合のフォールバック処理
-            model.addAttribute("error", "ダッシュボードの読み込み中にエラーが発生しました: " + e.getMessage());
+            model.addAttribute("error", AppConstants.ERROR_DASHBOARD_LOAD + ": " + e.getMessage());
             model.addAttribute("user", new User());
             model.addAttribute("activeGoals", new ArrayList<>());
             model.addAttribute("weeklyProgress", new ArrayList<>());
@@ -274,5 +261,34 @@ public class WebController {
     @GetMapping("/login")
     public String loginForm() {
         return "login";
+    }
+    
+    /**
+     * ユーザーを取得またはデフォルトユーザーを作成
+     */
+    private User getUserOrCreateDefault(Long userId) {
+        User user = userService.findById(userId).orElse(null);
+        if (user == null) {
+            // ユーザーが存在しない場合は最初のユーザーを取得
+            List<User> users = userService.findAll();
+            if (!users.isEmpty()) {
+                user = users.get(0);
+            } else {
+                // ユーザーが存在しない場合はデフォルトユーザーを作成
+                user = createDefaultUser();
+            }
+        }
+        return user;
+    }
+    
+    /**
+     * デフォルトユーザーを作成
+     */
+    private User createDefaultUser() {
+        User user = new User();
+        user.setUsername(AppConstants.DEFAULT_USERNAME);
+        user.setEmail(AppConstants.DEFAULT_EMAIL);
+        user.setPassword(AppConstants.DEFAULT_PASSWORD);
+        return userService.save(user);
     }
 } 

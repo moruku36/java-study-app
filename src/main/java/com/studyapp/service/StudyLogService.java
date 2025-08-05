@@ -21,14 +21,17 @@ import java.util.Optional;
 @Transactional
 public class StudyLogService {
     
-    @Autowired
-    private StudyLogRepository studyLogRepository;
+    private final StudyLogRepository studyLogRepository;
+    private final UserRepository userRepository;
+    private final LearningGoalRepository learningGoalRepository;
     
-    @Autowired
-    private UserRepository userRepository;
-    
-    @Autowired
-    private LearningGoalRepository learningGoalRepository;
+    public StudyLogService(StudyLogRepository studyLogRepository,
+                          UserRepository userRepository,
+                          LearningGoalRepository learningGoalRepository) {
+        this.studyLogRepository = studyLogRepository;
+        this.userRepository = userRepository;
+        this.learningGoalRepository = learningGoalRepository;
+    }
     
     public List<StudyLog> findAll() {
         return studyLogRepository.findAll();

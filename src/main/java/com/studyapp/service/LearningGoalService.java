@@ -15,11 +15,14 @@ import java.util.Optional;
 @Transactional
 public class LearningGoalService {
     
-    @Autowired
-    private LearningGoalRepository learningGoalRepository;
+    private final LearningGoalRepository learningGoalRepository;
+    private final UserRepository userRepository;
     
-    @Autowired
-    private UserRepository userRepository;
+    public LearningGoalService(LearningGoalRepository learningGoalRepository,
+                              UserRepository userRepository) {
+        this.learningGoalRepository = learningGoalRepository;
+        this.userRepository = userRepository;
+    }
     
     public List<LearningGoal> findAll() {
         return learningGoalRepository.findAll();

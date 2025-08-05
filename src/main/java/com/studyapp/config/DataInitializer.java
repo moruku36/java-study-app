@@ -16,17 +16,20 @@ import java.time.LocalDate;
 @Component
 public class DataInitializer implements CommandLineRunner {
     
-    @Value("${spring.data.init.enabled:true}")
-    private boolean dataInitEnabled;
+    private final boolean dataInitEnabled;
+    private final UserService userService;
+    private final LearningGoalService learningGoalService;
+    private final StudyLogService studyLogService;
     
-    @Autowired
-    private UserService userService;
-    
-    @Autowired
-    private LearningGoalService learningGoalService;
-    
-    @Autowired
-    private StudyLogService studyLogService;
+    public DataInitializer(@Value("${spring.data.init.enabled:true}") boolean dataInitEnabled,
+                          UserService userService,
+                          LearningGoalService learningGoalService,
+                          StudyLogService studyLogService) {
+        this.dataInitEnabled = dataInitEnabled;
+        this.userService = userService;
+        this.learningGoalService = learningGoalService;
+        this.studyLogService = studyLogService;
+    }
     
     @Override
     public void run(String... args) throws Exception {

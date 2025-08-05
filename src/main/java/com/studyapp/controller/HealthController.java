@@ -1,5 +1,6 @@
 package com.studyapp.controller;
 
+import com.studyapp.constant.AppConstants;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.http.ResponseEntity;
@@ -15,8 +16,8 @@ public class HealthController {
         Map<String, Object> response = new HashMap<>();
         response.put("status", "UP");
         response.put("timestamp", LocalDateTime.now());
-        response.put("application", "java-study-app");
-        response.put("version", "1.0.0");
+        response.put("application", AppConstants.APP_NAME);
+        response.put("version", AppConstants.APP_VERSION);
         return ResponseEntity.ok(response);
     }
     
