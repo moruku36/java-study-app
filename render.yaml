@@ -21,9 +21,9 @@ services:
       - key: SPRING_LOG_LEVEL
         value: INFO
       - key: HIBERNATE_SQL_LOG
-        value: true
+        value: DEBUG
       - key: HIBERNATE_BINDER_LOG
-        value: true
+        value: TRACE
       - key: JPA_LOG_LEVEL
         value: DEBUG
       - key: TRANSACTION_LOG_LEVEL

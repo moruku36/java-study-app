@@ -73,8 +73,8 @@ logging:
   level:
     com.studyapp: ${LOG_LEVEL:DEBUG}
     org.springframework: ${SPRING_LOG_LEVEL:INFO}
-    org.hibernate.SQL: ${HIBERNATE_SQL_LOG:true}
-    org.hibernate.type.descriptor.sql.BasicBinder: ${HIBERNATE_BINDER_LOG:true}
+    org.hibernate.SQL: ${HIBERNATE_SQL_LOG:DEBUG}
+    org.hibernate.type.descriptor.sql.BasicBinder: ${HIBERNATE_BINDER_LOG:TRACE}
     org.springframework.orm.jpa: ${JPA_LOG_LEVEL:DEBUG}
     org.springframework.transaction: ${TRANSACTION_LOG_LEVEL:DEBUG}
     org.springframework.boot: ${BOOT_LOG_LEVEL:INFO}
