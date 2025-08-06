@@ -7,6 +7,8 @@ import com.studyapp.dto.WeeklyProgressDto;
 import com.studyapp.service.LearningGoalService;
 import com.studyapp.service.StudyLogService;
 import com.studyapp.service.UserService;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
@@ -19,6 +21,8 @@ import java.util.ArrayList;
 
 @Controller
 public class WebController {
+    
+    private static final Logger logger = LoggerFactory.getLogger(WebController.class);
     
     private final UserService userService;
     private final LearningGoalService learningGoalService;
@@ -63,13 +67,24 @@ public class WebController {
             model.addAttribute("weeklyTotal", weeklyTotal != null ? weeklyTotal : 0);
             
         } catch (Exception e) {
-            // エラーが発生した場合のフォールバック処理
-            model.addAttribute("error", AppConstants.ERROR_DASHBOARD_LOAD + ": " + e.getMessage());
+            // エラーの詳細をログに出力
+            logger.error("ダッシュボードのデータ取得中にエラーが発生しました。", e);
+            
+            // エラー情報をモデルに追加
+            model.addAttribute("status", "500");
+            model.addAttribute("error", e.getClass().getSimpleName());
+            model.addAttribute("message", e.getMessage());
+            model.addAttribute("stackTrace", getStackTraceAsString(e));
+            
+            // フォールバックデータを設定
             model.addAttribute("user", new User());
             model.addAttribute("activeGoals", new ArrayList<>());
             model.addAttribute("weeklyProgress", new ArrayList<>());
             model.addAttribute("todayLogs", new ArrayList<>());
             model.addAttribute("weeklyTotal", 0);
+            
+            // エラーページを直接表示
+            return "error";
         }
         
         return "dashboard";
@@ -162,11 +177,22 @@ public class WebController {
             model.addAttribute("endDate", end);
             
         } catch (Exception e) {
-            // エラーが発生した場合のフォールバック処理
-            model.addAttribute("error", "学習履歴の取得中にエラーが発生しました: " + e.getMessage());
+            // エラーの詳細をログに出力
+            logger.error("学習履歴の取得中にエラーが発生しました。", e);
+            
+            // エラー情報をモデルに追加
+            model.addAttribute("status", "500");
+            model.addAttribute("error", e.getClass().getSimpleName());
+            model.addAttribute("message", e.getMessage());
+            model.addAttribute("stackTrace", getStackTraceAsString(e));
+            
+            // フォールバックデータを設定
             model.addAttribute("logs", new ArrayList<>());
             model.addAttribute("startDate", LocalDate.now().minusWeeks(1));
             model.addAttribute("endDate", LocalDate.now());
+            
+            // エラーページを直接表示
+            return "error";
         }
         
         return "history";
@@ -200,6 +226,9 @@ public class WebController {
             model.addAttribute("today", LocalDate.now());
             
         } catch (Exception e) {
+            // エラーの詳細をログに出力
+            logger.error("学習記録の保存中にエラーが発生しました。", e);
+            
             model.addAttribute("error", "学習記録の保存中にエラーが発生しました: " + e.getMessage());
             model.addAttribute("user", userService.findById(userId).orElse(null));
             model.addAttribute("studyLog", new StudyLog());
@@ -253,6 +282,9 @@ public class WebController {
             return "redirect:/login";
             
         } catch (Exception e) {
+            // エラーの詳細をログに出力
+            logger.error("ユーザー登録中にエラーが発生しました。", e);
+            
             model.addAttribute("error", "ユーザー登録中にエラーが発生しました: " + e.getMessage());
             return "register";
         }
@@ -290,5 +322,17 @@ public class WebController {
         user.setEmail(AppConstants.DEFAULT_EMAIL);
         user.setPassword(AppConstants.DEFAULT_PASSWORD);
         return userService.save(user);
+    }
+    
+    /**
+     * 例外のスタックトレースを文字列として取得
+     */
+    private String getStackTraceAsString(Exception e) {
+        StringBuilder sb = new StringBuilder();
+        sb.append(e.toString()).append("\n");
+        for (StackTraceElement element : e.getStackTrace()) {
+            sb.append("\tat ").append(element.toString()).append("\n");
+        }
+        return sb.toString();
     }
 } 

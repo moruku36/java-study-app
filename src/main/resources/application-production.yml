@@ -68,19 +68,19 @@ server:
       min-spare: 10
     connection-timeout: 20000
 
-# ログ設定（本番環境 - 最適化）
+# ログ設定（本番環境 - デバッグ用）
 logging:
   level:
-    com.studyapp: ${LOG_LEVEL:INFO}
-    org.springframework: ${SPRING_LOG_LEVEL:WARN}
-    org.hibernate.SQL: ${HIBERNATE_SQL_LOG:false}
-    org.hibernate.type.descriptor.sql.BasicBinder: ${HIBERNATE_BINDER_LOG:false}
-    org.springframework.orm.jpa: ${JPA_LOG_LEVEL:WARN}
-    org.springframework.transaction: ${TRANSACTION_LOG_LEVEL:WARN}
-    org.springframework.boot: ${BOOT_LOG_LEVEL:WARN}
-    org.springframework.context: ${CONTEXT_LOG_LEVEL:WARN}
-    org.springframework.beans: ${BEANS_LOG_LEVEL:WARN}
-    root: ${ROOT_LOG_LEVEL:WARN}
+    com.studyapp: ${LOG_LEVEL:DEBUG}
+    org.springframework: ${SPRING_LOG_LEVEL:INFO}
+    org.hibernate.SQL: ${HIBERNATE_SQL_LOG:true}
+    org.hibernate.type.descriptor.sql.BasicBinder: ${HIBERNATE_BINDER_LOG:true}
+    org.springframework.orm.jpa: ${JPA_LOG_LEVEL:DEBUG}
+    org.springframework.transaction: ${TRANSACTION_LOG_LEVEL:DEBUG}
+    org.springframework.boot: ${BOOT_LOG_LEVEL:INFO}
+    org.springframework.context: ${CONTEXT_LOG_LEVEL:INFO}
+    org.springframework.beans: ${BEANS_LOG_LEVEL:INFO}
+    root: ${ROOT_LOG_LEVEL:INFO}
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
 
