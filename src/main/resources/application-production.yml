@@ -1,20 +1,24 @@
 spring:
   # データベース設定（本番環境 - PostgreSQL）
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://dpg-d285h0ggjchc738ul2s0-a.oregon-postgres.render.com/mydb_t10f?sslmode=require}
+    url: ${DATABASE_URL:jdbc:postgresql://dpg-d285h0ggjchc738ul2s0-a.oregon-postgres.render.com/mydb_t10f?sslmode=require&ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory}
     username: ${DATABASE_USERNAME:mydb_t10f_user}
     password: ${DATABASE_PASSWORD:eGZOMQiK0TTp9MBUxDPdF63PCip5fa0A}
     driver-class-name: org.postgresql.Driver
-    # 接続プール設定
+    # 接続プール設定（PostgreSQL最適化）
     hikari:
-      maximum-pool-size: 3
-      minimum-idle: 1
-      connection-timeout: 20000
-      idle-timeout: 300000
-      max-lifetime: 600000
+      maximum-pool-size: 5
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
       connection-test-query: SELECT 1
-      validation-timeout: 3000
-      leak-detection-threshold: 30000
+      validation-timeout: 5000
+      leak-detection-threshold: 60000
+      # PostgreSQL固有の設定
+      data-source-properties:
+        ssl: true
+        sslmode: require
 
   # Thymeleaf設定（本番環境）
   thymeleaf:
@@ -33,7 +37,7 @@ spring:
   
   # 起動時間短縮のための設定
   main:
-    lazy-initialization: true
+    lazy-initialization: false
     banner-mode: off
   
   # JPA最適化
@@ -44,8 +48,9 @@ spring:
     properties:
       hibernate:
         format_sql: false
+        # トランザクション管理の改善
         connection:
-          provider_disables_autocommit: true
+          provider_disables_autocommit: false
         jdbc:
           batch_size: 20
           batch_versioned_data: true

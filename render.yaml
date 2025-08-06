@@ -29,7 +29,7 @@ services:
       - key: TRANSACTION_LOG_LEVEL
         value: DEBUG
       - key: SPRING_DATASOURCE_URL
-        value: jdbc:postgresql://dpg-d285h0ggjchc738ul2s0-a.oregon-postgres.render.com/mydb_t10f?sslmode=require
+        value: jdbc:postgresql://dpg-d285h0ggjchc738ul2s0-a.oregon-postgres.render.com/mydb_t10f?sslmode=require&ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory
       - key: SPRING_DATASOURCE_USERNAME
         value: mydb_t10f_user
       - key: SPRING_DATASOURCE_PASSWORD
