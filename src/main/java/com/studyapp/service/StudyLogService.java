@@ -61,6 +61,17 @@ public class StudyLogService {
     
     public StudyLog logStudy(Long userId, LocalDate studyDate, Integer minutesStudied, String notes) {
         try {
+            // パラメータのバリデーション
+            if (userId == null) {
+                throw new IllegalArgumentException("ユーザーIDが指定されていません");
+            }
+            if (studyDate == null) {
+                throw new IllegalArgumentException("学習日が指定されていません");
+            }
+            if (minutesStudied == null || minutesStudied < 1 || minutesStudied > 1440) {
+                throw new IllegalArgumentException("学習時間は1分〜1440分の間で指定してください");
+            }
+            
             Optional<User> userOpt = userRepository.findById(userId);
             if (userOpt.isEmpty()) {
                 throw new IllegalArgumentException("ユーザーが見つかりません: " + userId);
@@ -82,10 +93,13 @@ public class StudyLogService {
                 StudyLog newLog = new StudyLog(userOpt.get(), studyDate, minutesStudied, notes);
                 return studyLogRepository.save(newLog);
             }
+        } catch (IllegalArgumentException e) {
+            // バリデーションエラーはそのまま再スロー
+            throw e;
         } catch (Exception e) {
             System.err.println("学習記録保存エラー: " + e.getMessage());
             e.printStackTrace();
-            throw e; // 上位に例外を再スロー
+            throw new RuntimeException("データベースエラーが発生しました: " + e.getMessage());
         }
     }
     

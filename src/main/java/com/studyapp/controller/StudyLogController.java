@@ -49,13 +49,30 @@ public class StudyLogController {
             @RequestParam(required = false) String notes) {
         
         try {
+            // パラメータのバリデーション
+            if (userId == null) {
+                return ResponseEntity.badRequest().body(new ErrorResponse("ユーザーIDが指定されていません"));
+            }
+            if (studyDate == null || studyDate.trim().isEmpty()) {
+                return ResponseEntity.badRequest().body(new ErrorResponse("学習日が指定されていません"));
+            }
+            if (minutesStudied == null || minutesStudied < 1 || minutesStudied > 1440) {
+                return ResponseEntity.badRequest().body(new ErrorResponse("学習時間は1分〜1440分の間で指定してください"));
+            }
+            
             LocalDate date = LocalDate.parse(studyDate);
             StudyLog log = studyLogService.logStudy(userId, date, minutesStudied, notes);
             return ResponseEntity.ok(log);
+        } catch (java.time.format.DateTimeParseException e) {
+            System.err.println("日付パースエラー: " + e.getMessage());
+            return ResponseEntity.badRequest().body(new ErrorResponse("日付の形式が正しくありません"));
+        } catch (IllegalArgumentException e) {
+            System.err.println("バリデーションエラー: " + e.getMessage());
+            return ResponseEntity.badRequest().body(new ErrorResponse(e.getMessage()));
         } catch (Exception e) {
             System.err.println("学習記録保存エラー: " + e.getMessage());
             e.printStackTrace();
-            return ResponseEntity.badRequest().body(new ErrorResponse("学習記録の保存中にエラーが発生しました: " + e.getMessage()));
+            return ResponseEntity.status(500).body(new ErrorResponse("サーバーエラーが発生しました。しばらく時間をおいて再度お試しください"));
         }
     }
     

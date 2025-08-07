@@ -2,8 +2,10 @@ C:\Users\kentaro\iCloudDrive\Documents\GitHub\java-study-app\src\main\java\com\s
 C:\Users\kentaro\iCloudDrive\Documents\GitHub\java-study-app\src\main\java\com\studyapp\config\SecurityConfig.java
 C:\Users\kentaro\iCloudDrive\Documents\GitHub\java-study-app\src\main\java\com\studyapp\dto\WeeklyReport.java
 C:\Users\kentaro\iCloudDrive\Documents\GitHub\java-study-app\src\main\java\com\studyapp\service\UserService.java
+C:\Users\kentaro\iCloudDrive\Documents\GitHub\java-study-app\src\main\java\com\studyapp\constant\AppConstants.java
 C:\Users\kentaro\iCloudDrive\Documents\GitHub\java-study-app\src\main\java\com\studyapp\service\LearningGoalService.java
 C:\Users\kentaro\iCloudDrive\Documents\GitHub\java-study-app\src\main\java\com\studyapp\domain\User.java
+C:\Users\kentaro\iCloudDrive\Documents\GitHub\java-study-app\src\main\java\com\studyapp\exception\StudyAppException.java
 C:\Users\kentaro\iCloudDrive\Documents\GitHub\java-study-app\src\main\java\com\studyapp\StudyAppApplication.java
 C:\Users\kentaro\iCloudDrive\Documents\GitHub\java-study-app\src\main\java\com\studyapp\domain\StudyLog.java
 C:\Users\kentaro\iCloudDrive\Documents\GitHub\java-study-app\src\main\java\com\studyapp\controller\WebController.java
@@ -17,3 +19,4 @@ C:\Users\kentaro\iCloudDrive\Documents\GitHub\java-study-app\src\main\java\com\s
 C:\Users\kentaro\iCloudDrive\Documents\GitHub\java-study-app\src\main\java\com\studyapp\repository\UserRepository.java
 C:\Users\kentaro\iCloudDrive\Documents\GitHub\java-study-app\src\main\java\com\studyapp\service\StudyLogService.java
 C:\Users\kentaro\iCloudDrive\Documents\GitHub\java-study-app\src\main\java\com\studyapp\repository\StudyLogRepository.java
+C:\Users\kentaro\iCloudDrive\Documents\GitHub\java-study-app\src\main\java\com\studyapp\controller\HealthController.java

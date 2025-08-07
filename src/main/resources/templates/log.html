@@ -270,7 +270,10 @@
             })
             .then(response => {
                 if (!response.ok) {
-                    throw new Error('Network response was not ok');
+                    // エラーレスポンスの詳細を取得
+                    return response.json().then(errorData => {
+                        throw new Error(errorData.error || 'サーバーエラーが発生しました');
+                    });
                 }
                 return response.json();
             })
@@ -290,7 +293,15 @@
             })
             .catch(error => {
                 console.error('Error:', error);
-                showAlert('danger', 'ネットワークエラーが発生しました。接続を確認して再度お試しください。');
+                let errorMessage = 'エラーが発生しました。もう一度お試しください。';
+                
+                if (error.message) {
+                    errorMessage = error.message;
+                } else if (error.name === 'TypeError' && error.message.includes('fetch')) {
+                    errorMessage = 'ネットワークエラーが発生しました。接続を確認して再度お試しください。';
+                }
+                
+                showAlert('danger', errorMessage);
             })
             .finally(() => {
                 // 送信ボタンを元に戻す
