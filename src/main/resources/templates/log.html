@@ -247,6 +247,17 @@
         document.getElementById('studyLogForm').addEventListener('submit', function(e) {
             e.preventDefault();
             
+            // フォームバリデーション
+            if (!validateForm()) {
+                return;
+            }
+            
+            // 送信ボタンを無効化
+            const submitBtn = this.querySelector('button[type="submit"]');
+            const originalText = submitBtn.innerHTML;
+            submitBtn.disabled = true;
+            submitBtn.innerHTML = '<i class="fas fa-spinner fa-spin me-2"></i>保存中...';
+            
             const formData = new FormData(this);
             const data = Object.fromEntries(formData);
             
@@ -257,20 +268,94 @@
                 },
                 body: new URLSearchParams(data)
             })
-            .then(response => response.json())
+            .then(response => {
+                if (!response.ok) {
+                    throw new Error('Network response was not ok');
+                }
+                return response.json();
+            })
             .then(data => {
                 if (data.id) {
-                    alert('学習記録が正常に保存されました！');
-                    window.location.href = '/dashboard?userId=' + data.user.id;
+                    // 成功メッセージを表示
+                    showAlert('success', '学習記録が正常に保存されました！');
+                    // 少し待ってからダッシュボードにリダイレクト
+                    setTimeout(() => {
+                        window.location.href = '/dashboard?userId=' + data.user.id;
+                    }, 1500);
+                } else if (data.error) {
+                    showAlert('danger', data.error);
                 } else {
-                    alert('エラーが発生しました。もう一度お試しください。');
+                    showAlert('danger', 'エラーが発生しました。もう一度お試しください。');
                 }
             })
             .catch(error => {
                 console.error('Error:', error);
-                alert('エラーが発生しました。もう一度お試しください。');
+                showAlert('danger', 'ネットワークエラーが発生しました。接続を確認して再度お試しください。');
+            })
+            .finally(() => {
+                // 送信ボタンを元に戻す
+                submitBtn.disabled = false;
+                submitBtn.innerHTML = originalText;
             });
         });
+        
+        // フォームバリデーション関数
+        function validateForm() {
+            const studyDate = document.getElementById('studyDate').value;
+            const minutesStudied = document.getElementById('minutesStudied').value;
+            
+            // 日付のバリデーション
+            if (!studyDate) {
+                showAlert('danger', '学習日を入力してください。');
+                return false;
+            }
+            
+            const selectedDate = new Date(studyDate);
+            const today = new Date();
+            today.setHours(23, 59, 59, 999); // 今日の終わり
+            
+            if (selectedDate > today) {
+                showAlert('danger', '未来の日付は選択できません。');
+                return false;
+            }
+            
+            // 学習時間のバリデーション
+            if (!minutesStudied || minutesStudied < 1 || minutesStudied > 1440) {
+                showAlert('danger', '学習時間は1分〜1440分（24時間）の間で入力してください。');
+                return false;
+            }
+            
+            return true;
+        }
+        
+        // アラート表示関数
+        function showAlert(type, message) {
+            // 既存のアラートを削除
+            const existingAlert = document.querySelector('.alert');
+            if (existingAlert) {
+                existingAlert.remove();
+            }
+            
+            // 新しいアラートを作成
+            const alertDiv = document.createElement('div');
+            alertDiv.className = `alert alert-${type} alert-dismissible fade show`;
+            alertDiv.innerHTML = `
+                <i class="fas fa-${type === 'success' ? 'check-circle' : 'exclamation-triangle'} me-2"></i>
+                ${message}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            `;
+            
+            // フォームの前に挿入
+            const form = document.getElementById('studyLogForm');
+            form.parentNode.insertBefore(alertDiv, form);
+            
+            // 成功時は自動で消去
+            if (type === 'success') {
+                setTimeout(() => {
+                    alertDiv.remove();
+                }, 3000);
+            }
+        }
         
         // クイック追加機能
         function quickAdd(minutes) {

@@ -60,26 +60,32 @@ public class StudyLogService {
     }
     
     public StudyLog logStudy(Long userId, LocalDate studyDate, Integer minutesStudied, String notes) {
-        Optional<User> userOpt = userRepository.findById(userId);
-        if (userOpt.isEmpty()) {
-            throw new IllegalArgumentException("ユーザーが見つかりません: " + userId);
-        }
-        
-        // 同じ日の記録があるかチェック
-        Optional<StudyLog> existingLog = studyLogRepository.findByUserIdAndStudyDate(userId, studyDate);
-        if (existingLog.isPresent()) {
-            // 既存の記録を更新
-            StudyLog log = existingLog.get();
-            log.setMinutesStudied(log.getMinutesStudied() + minutesStudied);
-            if (notes != null && !notes.trim().isEmpty()) {
-                String currentNotes = log.getNotes();
-                log.setNotes(currentNotes != null ? currentNotes + "\n" + notes : notes);
+        try {
+            Optional<User> userOpt = userRepository.findById(userId);
+            if (userOpt.isEmpty()) {
+                throw new IllegalArgumentException("ユーザーが見つかりません: " + userId);
             }
-            return studyLogRepository.save(log);
-        } else {
-            // 新しい記録を作成
-            StudyLog newLog = new StudyLog(userOpt.get(), studyDate, minutesStudied, notes);
-            return studyLogRepository.save(newLog);
+            
+            // 同じ日の記録があるかチェック
+            Optional<StudyLog> existingLog = studyLogRepository.findByUserIdAndStudyDate(userId, studyDate);
+            if (existingLog.isPresent()) {
+                // 既存の記録を更新
+                StudyLog log = existingLog.get();
+                log.setMinutesStudied(log.getMinutesStudied() + minutesStudied);
+                if (notes != null && !notes.trim().isEmpty()) {
+                    String currentNotes = log.getNotes();
+                    log.setNotes(currentNotes != null ? currentNotes + "\n" + notes : notes);
+                }
+                return studyLogRepository.save(log);
+            } else {
+                // 新しい記録を作成
+                StudyLog newLog = new StudyLog(userOpt.get(), studyDate, minutesStudied, notes);
+                return studyLogRepository.save(newLog);
+            }
+        } catch (Exception e) {
+            System.err.println("学習記録保存エラー: " + e.getMessage());
+            e.printStackTrace();
+            throw e; // 上位に例外を再スロー
         }
     }
     

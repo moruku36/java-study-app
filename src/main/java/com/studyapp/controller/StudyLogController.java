@@ -10,6 +10,23 @@ import org.springframework.web.bind.annotation.*;
 import java.time.LocalDate;
 import java.util.List;
 
+// エラーレスポンス用の内部クラス
+class ErrorResponse {
+    private String error;
+    
+    public ErrorResponse(String error) {
+        this.error = error;
+    }
+    
+    public String getError() {
+        return error;
+    }
+    
+    public void setError(String error) {
+        this.error = error;
+    }
+}
+
 @RestController
 @RequestMapping("/api/logs")
 @CrossOrigin(origins = "*")
@@ -25,15 +42,21 @@ public class StudyLogController {
     }
     
     @PostMapping("/log")
-    public ResponseEntity<StudyLog> logStudyWithParams(
+    public ResponseEntity<?> logStudyWithParams(
             @RequestParam Long userId,
             @RequestParam String studyDate,
             @RequestParam Integer minutesStudied,
             @RequestParam(required = false) String notes) {
         
-        LocalDate date = LocalDate.parse(studyDate);
-        StudyLog log = studyLogService.logStudy(userId, date, minutesStudied, notes);
-        return ResponseEntity.ok(log);
+        try {
+            LocalDate date = LocalDate.parse(studyDate);
+            StudyLog log = studyLogService.logStudy(userId, date, minutesStudied, notes);
+            return ResponseEntity.ok(log);
+        } catch (Exception e) {
+            System.err.println("学習記録保存エラー: " + e.getMessage());
+            e.printStackTrace();
+            return ResponseEntity.badRequest().body(new ErrorResponse("学習記録の保存中にエラーが発生しました: " + e.getMessage()));
+        }
     }
     
     @GetMapping("/{userId}")
