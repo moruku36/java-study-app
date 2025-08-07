@@ -1,6 +1,7 @@
 package com.studyapp.controller;
 
 import com.studyapp.domain.StudyLog;
+import com.studyapp.domain.User;
 import com.studyapp.dto.WeeklyProgressDto;
 import com.studyapp.service.StudyLogService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -24,6 +25,44 @@ class ErrorResponse {
     
     public void setError(String error) {
         this.error = error;
+    }
+}
+
+// 学習記録レスポンス用のDTO
+class StudyLogResponse {
+    private Long id;
+    private Long userId;
+    private String username;
+    private String studyDate;
+    private Integer minutesStudied;
+    private String notes;
+    private String createdAt;
+    
+    public StudyLogResponse(StudyLog studyLog) {
+        this.id = studyLog.getId();
+        this.userId = studyLog.getUser().getId();
+        this.username = studyLog.getUser().getUsername();
+        this.studyDate = studyLog.getStudyDate().toString();
+        this.minutesStudied = studyLog.getMinutesStudied();
+        this.notes = studyLog.getNotes();
+        this.createdAt = studyLog.getCreatedAt() != null ? studyLog.getCreatedAt().toString() : null;
+    }
+    
+    // Getters
+    public Long getId() { return id; }
+    public Long getUserId() { return userId; }
+    public String getUsername() { return username; }
+    public String getStudyDate() { return studyDate; }
+    public Integer getMinutesStudied() { return minutesStudied; }
+    public String getNotes() { return notes; }
+    public String getCreatedAt() { return createdAt; }
+    
+    // User object for compatibility
+    public User getUser() {
+        User user = new User();
+        user.setId(userId);
+        user.setUsername(username);
+        return user;
     }
 }
 
@@ -62,7 +101,7 @@ public class StudyLogController {
             
             LocalDate date = LocalDate.parse(studyDate);
             StudyLog log = studyLogService.logStudy(userId, date, minutesStudied, notes);
-            return ResponseEntity.ok(log);
+            return ResponseEntity.ok(new StudyLogResponse(log));
         } catch (java.time.format.DateTimeParseException e) {
             System.err.println("日付パースエラー: " + e.getMessage());
             return ResponseEntity.badRequest().body(new ErrorResponse("日付の形式が正しくありません"));

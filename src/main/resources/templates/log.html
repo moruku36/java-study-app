@@ -278,12 +278,13 @@
                 return response.json();
             })
             .then(data => {
+                console.log('Response data:', data);
                 if (data.id) {
                     // 成功メッセージを表示
                     showAlert('success', '学習記録が正常に保存されました！');
                     // 少し待ってからダッシュボードにリダイレクト
                     setTimeout(() => {
-                        window.location.href = '/dashboard?userId=' + data.user.id;
+                        window.location.href = '/dashboard?userId=' + data.userId;
                     }, 1500);
                 } else if (data.error) {
                     showAlert('danger', data.error);
