@@ -17,19 +17,19 @@ services:
       - key: THYMELEAF_CACHE
         value: true
       - key: LOG_LEVEL
-        value: DEBUG
+        value: INFO
       - key: SPRING_LOG_LEVEL
         value: INFO
       - key: HIBERNATE_SQL_LOG
-        value: DEBUG
+        value: INFO
       - key: HIBERNATE_BINDER_LOG
-        value: TRACE
+        value: INFO
       - key: JPA_LOG_LEVEL
-        value: DEBUG
+        value: INFO
       - key: TRANSACTION_LOG_LEVEL
-        value: DEBUG
+        value: INFO
       - key: SPRING_DATASOURCE_URL
-        value: jdbc:postgresql://dpg-d285h0ggjchc738ul2s0-a.oregon-postgres.render.com/mydb_t10f?sslmode=require&ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory
+        value: jdbc:postgresql://dpg-d285h0ggjchc738ul2s0-a.oregon-postgres.render.com/mydb_t10f?sslmode=require
       - key: SPRING_DATASOURCE_USERNAME
         value: mydb_t10f_user
       - key: SPRING_DATASOURCE_PASSWORD

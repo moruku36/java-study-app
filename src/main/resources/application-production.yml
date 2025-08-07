@@ -1,24 +1,20 @@
 spring:
   # データベース設定（本番環境 - PostgreSQL）
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://dpg-d285h0ggjchc738ul2s0-a.oregon-postgres.render.com/mydb_t10f?sslmode=require&ssl=true&sslfactory=org.postgresql.ssl.NonValidatingFactory}
+    url: ${DATABASE_URL:jdbc:postgresql://dpg-d285h0ggjchc738ul2s0-a.oregon-postgres.render.com/mydb_t10f?sslmode=require}
     username: ${DATABASE_USERNAME:mydb_t10f_user}
     password: ${DATABASE_PASSWORD:eGZOMQiK0TTp9MBUxDPdF63PCip5fa0A}
     driver-class-name: org.postgresql.Driver
-    # 接続プール設定（PostgreSQL最適化）
+    # 接続プール設定（シンプル化）
     hikari:
-      maximum-pool-size: 5
-      minimum-idle: 2
-      connection-timeout: 30000
-      idle-timeout: 600000
-      max-lifetime: 1800000
+      maximum-pool-size: 3
+      minimum-idle: 1
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 600000
       connection-test-query: SELECT 1
-      validation-timeout: 5000
-      leak-detection-threshold: 60000
-      # PostgreSQL固有の設定
-      data-source-properties:
-        ssl: true
-        sslmode: require
+      validation-timeout: 3000
+      leak-detection-threshold: 30000
 
   # Thymeleaf設定（本番環境）
   thymeleaf:
@@ -30,17 +26,17 @@ spring:
     console:
       enabled: false
 
-  # データ初期化無効化（本番環境 - 起動高速化）
+  # データ初期化有効化（サンプルデータ作成）
   data:
     init:
-      enabled: false
+      enabled: true
   
   # 起動時間短縮のための設定
   main:
     lazy-initialization: false
     banner-mode: off
   
-  # JPA最適化
+  # JPA設定（シンプル化）
   jpa:
     hibernate:
       ddl-auto: update
@@ -48,18 +44,9 @@ spring:
     properties:
       hibernate:
         format_sql: false
-        # トランザクション管理の改善
-        connection:
-          provider_disables_autocommit: false
+        # 基本的な設定のみ
         jdbc:
-          batch_size: 20
-          batch_versioned_data: true
-        order_inserts: true
-        order_updates: true
-        # セッション管理最適化
-        session:
-          events:
-            log: false
+          batch_size: 10
 
 # サーバー設定
 server:
@@ -73,15 +60,15 @@ server:
       min-spare: 10
     connection-timeout: 20000
 
-# ログ設定（本番環境 - デバッグ用）
+# ログ設定（本番環境 - 安定化）
 logging:
   level:
-    com.studyapp: ${LOG_LEVEL:DEBUG}
+    com.studyapp: ${LOG_LEVEL:INFO}
     org.springframework: ${SPRING_LOG_LEVEL:INFO}
-    org.hibernate.SQL: ${HIBERNATE_SQL_LOG:DEBUG}
-    org.hibernate.type.descriptor.sql.BasicBinder: ${HIBERNATE_BINDER_LOG:TRACE}
-    org.springframework.orm.jpa: ${JPA_LOG_LEVEL:DEBUG}
-    org.springframework.transaction: ${TRANSACTION_LOG_LEVEL:DEBUG}
+    org.hibernate.SQL: ${HIBERNATE_SQL_LOG:INFO}
+    org.hibernate.type.descriptor.sql.BasicBinder: ${HIBERNATE_BINDER_LOG:INFO}
+    org.springframework.orm.jpa: ${JPA_LOG_LEVEL:INFO}
+    org.springframework.transaction: ${TRANSACTION_LOG_LEVEL:INFO}
     org.springframework.boot: ${BOOT_LOG_LEVEL:INFO}
     org.springframework.context: ${CONTEXT_LOG_LEVEL:INFO}
     org.springframework.beans: ${BEANS_LOG_LEVEL:INFO}
