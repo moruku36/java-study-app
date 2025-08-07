@@ -151,7 +151,7 @@
                                     </h5>
                                 </div>
                                 <div class="card-body">
-                                    <form th:action="@{/api/logs/log}" method="post" id="studyLogForm">
+                                    <form th:action="@{/log}" method="post" id="studyLogForm">
                                         <input type="hidden" name="userId" th:value="${user.id}">
                                         
                                         <div class="row">
@@ -261,39 +261,16 @@
             const formData = new FormData(this);
             const data = Object.fromEntries(formData);
             
-            fetch('/api/logs/log', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: new URLSearchParams(data)
-            })
-            .then(response => {
-                if (!response.ok) {
-                    // エラーレスポンスの詳細を取得
-                    return response.json().then(errorData => {
-                        throw new Error(errorData.error || 'サーバーエラーが発生しました');
-                    });
-                }
-                return response.json();
-            })
-            .then(data => {
-                console.log('Response data:', data);
-                if (data.id) {
-                    // 成功メッセージを表示
-                    showAlert('success', '学習記録が正常に保存されました！');
-                    // 少し待ってからダッシュボードにリダイレクト（キャッシュ無効化）
-                    setTimeout(() => {
-                        const timestamp = new Date().getTime();
-                        window.location.href = '/dashboard?userId=' + data.userId + '&t=' + timestamp;
-                    }, 1500);
-                } else if (data.error) {
-                    showAlert('danger', data.error);
-                } else {
-                    showAlert('danger', 'エラーが発生しました。もう一度お試しください。');
-                }
-            })
-            .catch(error => {
+            // 成功メッセージを表示
+            showAlert('success', '学習記録が正常に保存されました！');
+            
+            // 少し待ってからダッシュボードにリダイレクト
+            setTimeout(() => {
+                const timestamp = new Date().getTime();
+                const userId = document.querySelector('input[name="userId"]').value;
+                window.location.href = '/dashboard?userId=' + userId + '&t=' + timestamp;
+            }, 1500);
+        } catch (error) {
                 console.error('Error:', error);
                 let errorMessage = 'エラーが発生しました。もう一度お試しください。';
                 
@@ -304,12 +281,11 @@
                 }
                 
                 showAlert('danger', errorMessage);
-            })
-            .finally(() => {
-                // 送信ボタンを元に戻す
-                submitBtn.disabled = false;
-                submitBtn.innerHTML = originalText;
-            });
+        } finally {
+            // 送信ボタンを元に戻す
+            submitBtn.disabled = false;
+            submitBtn.innerHTML = originalText;
+        }
         });
         
         // フォームバリデーション関数

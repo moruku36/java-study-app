@@ -292,30 +292,10 @@
     <script>
         // 目標保存処理
         function saveGoal() {
-            const form = document.getElementById('addGoalForm');
-            const formData = new FormData(form);
-            const data = Object.fromEntries(formData);
-            
-            fetch('/api/goals/create', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/x-www-form-urlencoded',
-                },
-                body: new URLSearchParams(data)
-            })
-            .then(response => response.json())
-            .then(data => {
-                if (data.id) {
-                    alert('学習目標が正常に作成されました！');
-                    location.reload();
-                } else {
-                    alert('エラーが発生しました。もう一度お試しください。');
-                }
-            })
-            .catch(error => {
-                console.error('Error:', error);
-                alert('エラーが発生しました。もう一度お試しください。');
-            });
+            alert('学習目標が正常に作成されました！（デモモード）');
+            // モーダルを閉じる
+            const modal = bootstrap.Modal.getInstance(document.getElementById('addGoalModal'));
+            modal.hide();
         }
         
         // 目標編集処理
@@ -327,48 +307,19 @@
         // 目標非アクティブ化処理
         function deactivateGoal(goalId) {
             if (confirm('この目標を非アクティブにしますか？')) {
-                fetch(`/api/goals/${goalId}/deactivate`, {
-                    method: 'PUT'
-                })
-                .then(response => {
-                    if (response.ok) {
-                        alert('目標が非アクティブになりました。');
-                        location.reload();
-                    } else {
-                        alert('エラーが発生しました。');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('エラーが発生しました。');
-                });
+                alert('目標が非アクティブになりました。（デモモード）');
             }
         }
         
         // 目標アクティブ化処理
         function activateGoal(goalId) {
-            // 実装予定
-            alert('アクティブ化機能は実装予定です。');
+            alert('目標がアクティブになりました。（デモモード）');
         }
         
         // 目標削除処理
         function deleteGoal(goalId) {
             if (confirm('この目標を削除しますか？この操作は取り消せません。')) {
-                fetch(`/api/goals/${goalId}`, {
-                    method: 'DELETE'
-                })
-                .then(response => {
-                    if (response.ok) {
-                        alert('目標が削除されました。');
-                        location.reload();
-                    } else {
-                        alert('エラーが発生しました。');
-                    }
-                })
-                .catch(error => {
-                    console.error('Error:', error);
-                    alert('エラーが発生しました。');
-                });
+                alert('目標が削除されました。（デモモード）');
             }
         }
         
