@@ -66,25 +66,24 @@ public class WebController {
                 today.with(java.time.DayOfWeek.SATURDAY));
             model.addAttribute("weeklyTotal", weeklyTotal != null ? weeklyTotal : 0);
             
+            // エラーフラグをクリア
+            model.addAttribute("hasError", false);
+            
         } catch (Exception e) {
             // エラーの詳細をログに出力
             logger.error("ダッシュボードのデータ取得中にエラーが発生しました。", e);
             
             // エラー情報をモデルに追加
-            model.addAttribute("status", "500");
-            model.addAttribute("error", e.getClass().getSimpleName());
-            model.addAttribute("message", e.getMessage());
-            model.addAttribute("stackTrace", getStackTraceAsString(e));
+            model.addAttribute("hasError", true);
+            model.addAttribute("errorMessage", "データの取得中にエラーが発生しました。しばらく時間をおいて再度お試しください。");
             
             // フォールバックデータを設定
-            model.addAttribute("user", new User());
+            User user = getUserOrCreateDefault(userId);
+            model.addAttribute("user", user);
             model.addAttribute("activeGoals", new ArrayList<>());
             model.addAttribute("weeklyProgress", new ArrayList<>());
             model.addAttribute("todayLogs", new ArrayList<>());
             model.addAttribute("weeklyTotal", 0);
-            
-            // エラーページを直接表示
-            return "error";
         }
         
         return "dashboard";

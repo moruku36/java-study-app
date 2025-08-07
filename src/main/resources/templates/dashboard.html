@@ -146,6 +146,13 @@
                         </div>
                     </div>
                     
+                    <!-- Error Alert -->
+                    <div th:if="${hasError}" class="alert alert-warning alert-dismissible fade show" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <span th:text="${errorMessage}">エラーメッセージ</span>
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    
                     <!-- Stats Cards -->
                     <div class="row mb-4">
                         <div class="col-xl-3 col-md-6 mb-4">
@@ -197,7 +204,11 @@
                                                 今日の学習時間
                                             </div>
                                             <div class="h5 mb-0 font-weight-bold">
-                                                <span th:text="${todayLogs != null and !todayLogs.isEmpty() ? todayLogs.stream().mapToInt(log -> log.getMinutesStudied() != null ? log.getMinutesStudied() : 0).sum() : 0}">0</span> 分
+                                                <span th:if="${hasError}" class="text-warning">
+                                                    <i class="fas fa-exclamation-triangle me-1"></i>エラー
+                                                </span>
+                                                <span th:unless="${hasError}" th:text="${todayLogs != null and !todayLogs.isEmpty() ? todayLogs.stream().mapToInt(log -> log.getMinutesStudied() != null ? log.getMinutesStudied() : 0).sum() : 0}">0</span>
+                                                <span th:unless="${hasError}"> 分</span>
                                             </div>
                                         </div>
                                         <div class="col-auto">

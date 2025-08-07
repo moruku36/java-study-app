@@ -5,16 +5,18 @@ spring:
     username: ${DATABASE_USERNAME:mydb_t10f_user}
     password: ${DATABASE_PASSWORD:eGZOMQiK0TTp9MBUxDPdF63PCip5fa0A}
     driver-class-name: org.postgresql.Driver
-    # 接続プール設定（起動最適化）
+    # 接続プール設定（Render無料プラン対応）
     hikari:
-      maximum-pool-size: 1
-      minimum-idle: 1
-      connection-timeout: 20000
-      idle-timeout: 300000
-      max-lifetime: 600000
+      maximum-pool-size: 2
+      minimum-idle: 0
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1200000
       connection-test-query: SELECT 1
-      validation-timeout: 3000
-      leak-detection-threshold: 30000
+      validation-timeout: 5000
+      leak-detection-threshold: 60000
+      # 接続リトライ設定
+      connection-init-sql: SET statement_timeout = 30000
 
   # Thymeleaf設定（本番環境）
   thymeleaf:
@@ -36,7 +38,7 @@ spring:
     lazy-initialization: false
     banner-mode: off
   
-  # JPA設定（起動最適化）
+  # JPA設定（Render無料プラン対応）
   jpa:
     hibernate:
       ddl-auto: update
@@ -44,9 +46,18 @@ spring:
     properties:
       hibernate:
         format_sql: false
-        # 起動最適化設定
+        # 接続安定性向上設定
         jdbc:
           batch_size: 5
+        # タイムアウト設定
+        connection:
+          timeout: 30
+        # クエリタイムアウト設定
+        query:
+          timeout: 30
+        # セッションタイムアウト設定
+        session:
+          timeout: 30
 
 # サーバー設定（起動最適化）
 server:
@@ -59,10 +70,13 @@ server:
       min-spare: 5
     connection-timeout: 10000
 
-# ログ設定（本番環境 - 最小限）
+# ログ設定（本番環境 - エラー診断対応）
 logging:
   level:
     com.studyapp: ${LOG_LEVEL:INFO}
+    com.studyapp.controller: ${CONTROLLER_LOG_LEVEL:INFO}
+    com.studyapp.service: ${SERVICE_LOG_LEVEL:INFO}
+    com.studyapp.repository: ${REPOSITORY_LOG_LEVEL:WARN}
     org.springframework: ${SPRING_LOG_LEVEL:WARN}
     org.hibernate.SQL: ${HIBERNATE_SQL_LOG:WARN}
     org.hibernate.type.descriptor.sql.BasicBinder: ${HIBERNATE_BINDER_LOG:WARN}
@@ -71,6 +85,7 @@ logging:
     org.springframework.boot: ${BOOT_LOG_LEVEL:INFO}
     org.springframework.context: ${CONTEXT_LOG_LEVEL:WARN}
     org.springframework.beans: ${BEANS_LOG_LEVEL:WARN}
+    org.springframework.web: ${WEB_LOG_LEVEL:WARN}
     root: ${ROOT_LOG_LEVEL:WARN}
   pattern:
     console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"

@@ -10,6 +10,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.ArrayList;
 
 @Service
 @Transactional
@@ -37,7 +38,13 @@ public class LearningGoalService {
     }
     
     public List<LearningGoal> findActiveGoalsByUserId(Long userId) {
-        return learningGoalRepository.findActiveGoalsByUserId(userId);
+        try {
+            return learningGoalRepository.findActiveGoalsByUserId(userId);
+        } catch (Exception e) {
+            System.err.println("アクティブな学習目標取得エラー: " + e.getMessage());
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
     }
     
     public LearningGoal save(LearningGoal learningGoal) {

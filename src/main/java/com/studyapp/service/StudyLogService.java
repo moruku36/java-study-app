@@ -46,7 +46,13 @@ public class StudyLogService {
     }
     
     public List<StudyLog> findByUserIdAndDateRange(Long userId, LocalDate startDate, LocalDate endDate) {
-        return studyLogRepository.findByUserIdAndStudyDateBetween(userId, startDate, endDate);
+        try {
+            return studyLogRepository.findByUserIdAndStudyDateBetween(userId, startDate, endDate);
+        } catch (Exception e) {
+            System.err.println("学習記録取得エラー: " + e.getMessage());
+            e.printStackTrace();
+            return new ArrayList<>();
+        }
     }
     
     public StudyLog save(StudyLog studyLog) {
