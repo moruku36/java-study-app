@@ -282,9 +282,10 @@
                 if (data.id) {
                     // 成功メッセージを表示
                     showAlert('success', '学習記録が正常に保存されました！');
-                    // 少し待ってからダッシュボードにリダイレクト
+                    // 少し待ってからダッシュボードにリダイレクト（キャッシュ無効化）
                     setTimeout(() => {
-                        window.location.href = '/dashboard?userId=' + data.userId;
+                        const timestamp = new Date().getTime();
+                        window.location.href = '/dashboard?userId=' + data.userId + '&t=' + timestamp;
                     }, 1500);
                 } else if (data.error) {
                     showAlert('danger', data.error);

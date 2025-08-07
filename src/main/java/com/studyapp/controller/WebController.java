@@ -67,9 +67,20 @@ public class WebController {
             model.addAttribute("todayLogs", todayLogs != null ? todayLogs : new ArrayList<>());
             
             // 今週の総学習時間を計算
-            Integer weeklyTotal = studyLogService.getTotalStudyMinutes(userId, 
-                today.with(java.time.DayOfWeek.SUNDAY), 
-                today.with(java.time.DayOfWeek.SATURDAY));
+            LocalDate weekStart = today.with(java.time.temporal.TemporalAdjusters.previousOrSame(java.time.DayOfWeek.SUNDAY));
+            LocalDate weekEnd = today.with(java.time.temporal.TemporalAdjusters.nextOrSame(java.time.DayOfWeek.SATURDAY));
+            
+            logger.info("週次計算開始: userId={}, today={}, weekStart={}, weekEnd={}", 
+                userId, today, weekStart, weekEnd);
+            
+            Integer weeklyTotal = null;
+            try {
+                weeklyTotal = studyLogService.getTotalStudyMinutes(userId, weekStart, weekEnd);
+                logger.info("週次総学習時間計算完了: userId={}, total={}", userId, weeklyTotal);
+            } catch (Exception e) {
+                logger.error("週次総学習時間計算エラー: " + e.getMessage(), e);
+                weeklyTotal = 0;
+            }
             model.addAttribute("weeklyTotal", weeklyTotal != null ? weeklyTotal : 0);
             
             // エラーフラグをクリア

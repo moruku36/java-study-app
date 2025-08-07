@@ -138,10 +138,23 @@ public class StudyLogService {
     
     public Integer getTotalStudyMinutes(Long userId, LocalDate startDate, LocalDate endDate) {
         try {
+            System.out.println("総学習時間計算開始: userId=" + userId + ", startDate=" + startDate + ", endDate=" + endDate);
+            
             List<StudyLog> logs = studyLogRepository.findByUserIdAndStudyDateBetween(userId, startDate, endDate);
-            return logs != null ? logs.stream()
+            System.out.println("取得された学習記録数: " + (logs != null ? logs.size() : 0));
+            
+            if (logs != null && !logs.isEmpty()) {
+                logs.forEach(log -> {
+                    System.out.println("学習記録: date=" + log.getStudyDate() + ", minutes=" + log.getMinutesStudied());
+                });
+            }
+            
+            Integer total = logs != null ? logs.stream()
                     .mapToInt(log -> log.getMinutesStudied() != null ? log.getMinutesStudied() : 0)
                     .sum() : 0;
+            
+            System.out.println("総学習時間: " + total + "分");
+            return total;
         } catch (Exception e) {
             System.err.println("総学習時間取得エラー: " + e.getMessage());
             e.printStackTrace();
