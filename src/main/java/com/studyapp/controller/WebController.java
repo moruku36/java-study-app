@@ -57,7 +57,13 @@ public class WebController {
             
             // 今日の学習記録を取得
             LocalDate today = LocalDate.now();
-            List<StudyLog> todayLogs = studyLogService.findByUserIdAndDateRange(userId, today, today);
+            List<StudyLog> todayLogs = null;
+            try {
+                todayLogs = studyLogService.findByUserIdAndDateRange(userId, today, today);
+            } catch (Exception e) {
+                logger.error("今日の学習記録取得エラー: " + e.getMessage());
+                todayLogs = new ArrayList<>();
+            }
             model.addAttribute("todayLogs", todayLogs != null ? todayLogs : new ArrayList<>());
             
             // 今週の総学習時間を計算
@@ -75,7 +81,7 @@ public class WebController {
             
             // エラー情報をモデルに追加
             model.addAttribute("hasError", true);
-            model.addAttribute("errorMessage", "データの取得中にエラーが発生しました。しばらく時間をおいて再度お試しください。");
+            model.addAttribute("errorMessage", "今日の学習時間の取得中にエラーが発生しました。しばらく時間をおいて再度お試しください。");
             
             // フォールバックデータを設定
             User user = getUserOrCreateDefault(userId);
