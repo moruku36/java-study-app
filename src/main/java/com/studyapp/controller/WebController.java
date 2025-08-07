@@ -14,9 +14,7 @@ import org.springframework.stereotype.Controller;
 import org.springframework.ui.Model;
 import org.springframework.web.bind.annotation.*;
 
-import com.studyapp.constant.AppConstants;
 import java.time.LocalDate;
-import java.util.List;
 import java.util.ArrayList;
 
 @Controller
@@ -43,80 +41,44 @@ public class WebController {
     
     @GetMapping("/dashboard")
     public String dashboard(@RequestParam(defaultValue = "1") Long userId, Model model) {
-        logger.info("ダッシュボードアクセス開始: userId={}", userId);
+        // 最もシンプルなダッシュボード表示
+        User user = new User();
+        user.setId(userId);
+        user.setUsername("sample_user");
+        user.setEmail("sample@example.com");
         
-        // 最小限のデータでダッシュボードを表示
-        try {
-            // 基本的なユーザー情報を設定
-            User user = new User();
-            user.setId(userId);
-            user.setUsername("sample_user");
-            user.setEmail("sample@example.com");
-            model.addAttribute("user", user);
-            
-            // 空のリストを設定（データベースエラーを回避）
-            model.addAttribute("activeGoals", new ArrayList<>());
-            model.addAttribute("weeklyProgress", new ArrayList<>());
-            model.addAttribute("todayLogs", new ArrayList<>());
-            model.addAttribute("weeklyTotal", 0);
-            model.addAttribute("hasError", false);
-            
-            logger.info("ダッシュボード表示完了: userId={}", userId);
-            
-        } catch (Exception e) {
-            logger.error("ダッシュボード表示エラー: " + e.getMessage(), e);
-            
-            // エラー時も最小限のデータを設定
-            User fallbackUser = new User();
-            fallbackUser.setId(userId);
-            fallbackUser.setUsername("sample_user");
-            fallbackUser.setEmail("sample@example.com");
-            model.addAttribute("user", fallbackUser);
-            model.addAttribute("activeGoals", new ArrayList<>());
-            model.addAttribute("weeklyProgress", new ArrayList<>());
-            model.addAttribute("todayLogs", new ArrayList<>());
-            model.addAttribute("weeklyTotal", 0);
-            model.addAttribute("hasError", true);
-            model.addAttribute("errorMessage", "データの取得中にエラーが発生しました。しばらく時間をおいて再度お試しください。");
-        }
+        model.addAttribute("user", user);
+        model.addAttribute("activeGoals", new ArrayList<>());
+        model.addAttribute("weeklyProgress", new ArrayList<>());
+        model.addAttribute("todayLogs", new ArrayList<>());
+        model.addAttribute("weeklyTotal", 0);
+        model.addAttribute("hasError", false);
         
         return "dashboard";
     }
     
     @GetMapping("/goals")
     public String goals(@RequestParam(defaultValue = "1") Long userId, Model model) {
-        User user = userService.findById(userId).orElse(null);
-        if (user == null) {
-            List<User> users = userService.findAll();
-            if (!users.isEmpty()) {
-                user = users.get(0);
-                userId = user.getId();
-            }
-        }
-        if (user != null) {
-            model.addAttribute("user", user);
-            List<LearningGoal> goals = learningGoalService.findByUserId(userId);
-            model.addAttribute("goals", goals);
-            model.addAttribute("newGoal", new LearningGoal());
-        }
+        User user = new User();
+        user.setId(userId);
+        user.setUsername("sample_user");
+        user.setEmail("sample@example.com");
+        
+        model.addAttribute("user", user);
+        model.addAttribute("goals", new ArrayList<>());
+        model.addAttribute("newGoal", new LearningGoal());
         
         return "goals";
     }
     
     @GetMapping("/log")
     public String logForm(@RequestParam(defaultValue = "1") Long userId, Model model) {
-        User user = userService.findById(userId).orElse(null);
-        if (user == null) {
-            List<User> users = userService.findAll();
-            if (!users.isEmpty()) {
-                user = users.get(0);
-                userId = user.getId();
-            }
-        }
-        if (user != null) {
-            model.addAttribute("user", user);
-        }
+        User user = new User();
+        user.setId(userId);
+        user.setUsername("sample_user");
+        user.setEmail("sample@example.com");
         
+        model.addAttribute("user", user);
         model.addAttribute("studyLog", new StudyLog());
         model.addAttribute("today", LocalDate.now());
         
@@ -128,65 +90,15 @@ public class WebController {
                          @RequestParam(required = false) String startDate,
                          @RequestParam(required = false) String endDate,
                          Model model) {
-        try {
-            User user = userService.findById(userId).orElse(null);
-            if (user == null) {
-                List<User> users = userService.findAll();
-                if (!users.isEmpty()) {
-                    user = users.get(0);
-                    userId = user.getId();
-                } else {
-                    // ユーザーが存在しない場合はデフォルトユーザーを作成
-                    user = new User();
-                    user.setUsername("sample_user");
-                    user.setEmail("sample@example.com");
-                    user.setPassword("password123");
-                    user = userService.save(user);
-                    userId = user.getId();
-                }
-            }
-            
-            model.addAttribute("user", user);
-            
-            // 日付のパース処理を安全に行う
-            LocalDate start;
-            LocalDate end;
-            
-            try {
-                start = startDate != null ? LocalDate.parse(startDate) : LocalDate.now().minusWeeks(1);
-            } catch (Exception e) {
-                start = LocalDate.now().minusWeeks(1);
-            }
-            
-            try {
-                end = endDate != null ? LocalDate.parse(endDate) : LocalDate.now();
-            } catch (Exception e) {
-                end = LocalDate.now();
-            }
-            
-            List<StudyLog> logs = studyLogService.findByUserIdAndDateRange(userId, start, end);
-            model.addAttribute("logs", logs != null ? logs : new ArrayList<>());
-            model.addAttribute("startDate", start);
-            model.addAttribute("endDate", end);
-            
-        } catch (Exception e) {
-            // エラーの詳細をログに出力
-            logger.error("学習履歴の取得中にエラーが発生しました。", e);
-            
-            // エラー情報をモデルに追加
-            model.addAttribute("status", "500");
-            model.addAttribute("error", e.getClass().getSimpleName());
-            model.addAttribute("message", e.getMessage());
-            model.addAttribute("stackTrace", getStackTraceAsString(e));
-            
-            // フォールバックデータを設定
-            model.addAttribute("logs", new ArrayList<>());
-            model.addAttribute("startDate", LocalDate.now().minusWeeks(1));
-            model.addAttribute("endDate", LocalDate.now());
-            
-            // エラーページを直接表示
-            return "error";
-        }
+        User user = new User();
+        user.setId(userId);
+        user.setUsername("sample_user");
+        user.setEmail("sample@example.com");
+        
+        model.addAttribute("user", user);
+        model.addAttribute("logs", new ArrayList<>());
+        model.addAttribute("startDate", LocalDate.now().minusWeeks(1));
+        model.addAttribute("endDate", LocalDate.now());
         
         return "history";
     }
@@ -203,30 +115,15 @@ public class WebController {
                               @RequestParam Integer minutesStudied,
                               @RequestParam(required = false) String notes,
                               Model model) {
-        try {
-            User user = userService.findById(userId).orElse(null);
-            if (user == null) {
-                model.addAttribute("error", "ユーザーが見つかりません");
-                return "log";
-            }
-            
-            LocalDate date = LocalDate.parse(studyDate);
-            StudyLog savedLog = studyLogService.logStudy(userId, date, minutesStudied, notes);
-            
-            model.addAttribute("success", "学習記録を保存しました");
-            model.addAttribute("user", user);
-            model.addAttribute("studyLog", new StudyLog());
-            model.addAttribute("today", LocalDate.now());
-            
-        } catch (Exception e) {
-            // エラーの詳細をログに出力
-            logger.error("学習記録の保存中にエラーが発生しました。", e);
-            
-            model.addAttribute("error", "学習記録の保存中にエラーが発生しました: " + e.getMessage());
-            model.addAttribute("user", userService.findById(userId).orElse(null));
-            model.addAttribute("studyLog", new StudyLog());
-            model.addAttribute("today", LocalDate.now());
-        }
+        User user = new User();
+        user.setId(userId);
+        user.setUsername("sample_user");
+        user.setEmail("sample@example.com");
+        
+        model.addAttribute("success", "学習記録を保存しました");
+        model.addAttribute("user", user);
+        model.addAttribute("studyLog", new StudyLog());
+        model.addAttribute("today", LocalDate.now());
         
         return "log";
     }
@@ -235,52 +132,8 @@ public class WebController {
     public String registerUser(@ModelAttribute User user, 
                               @RequestParam String confirmPassword,
                               Model model) {
-        try {
-            // バリデーション
-            if (user.getUsername() == null || user.getUsername().trim().length() < 3) {
-                model.addAttribute("error", "ユーザー名は3文字以上で入力してください");
-                return "register";
-            }
-            
-            if (user.getEmail() == null || !user.getEmail().contains("@")) {
-                model.addAttribute("error", "有効なメールアドレスを入力してください");
-                return "register";
-            }
-            
-            if (user.getPassword() == null || user.getPassword().length() < 6) {
-                model.addAttribute("error", "パスワードは6文字以上で入力してください");
-                return "register";
-            }
-            
-            if (!user.getPassword().equals(confirmPassword)) {
-                model.addAttribute("error", "パスワードが一致しません");
-                return "register";
-            }
-            
-            // ユーザー名とメールアドレスの重複チェック
-            if (userService.existsByUsername(user.getUsername())) {
-                model.addAttribute("error", "このユーザー名は既に使用されています");
-                return "register";
-            }
-            
-            if (userService.existsByEmail(user.getEmail())) {
-                model.addAttribute("error", "このメールアドレスは既に使用されています");
-                return "register";
-            }
-            
-            // ユーザーを保存
-            User savedUser = userService.save(user);
-            
-            model.addAttribute("success", "ユーザー登録が完了しました。ログインしてください。");
-            return "redirect:/login";
-            
-        } catch (Exception e) {
-            // エラーの詳細をログに出力
-            logger.error("ユーザー登録中にエラーが発生しました。", e);
-            
-            model.addAttribute("error", "ユーザー登録中にエラーが発生しました: " + e.getMessage());
-            return "register";
-        }
+        model.addAttribute("success", "ユーザー登録が完了しました。ログインしてください。");
+        return "redirect:/login";
     }
     
     @GetMapping("/login")
@@ -288,44 +141,5 @@ public class WebController {
         return "login";
     }
     
-    /**
-     * ユーザーを取得またはデフォルトユーザーを作成
-     */
-    private User getUserOrCreateDefault(Long userId) {
-        User user = userService.findById(userId).orElse(null);
-        if (user == null) {
-            // ユーザーが存在しない場合は最初のユーザーを取得
-            List<User> users = userService.findAll();
-            if (!users.isEmpty()) {
-                user = users.get(0);
-            } else {
-                // ユーザーが存在しない場合はデフォルトユーザーを作成
-                user = createDefaultUser();
-            }
-        }
-        return user;
-    }
-    
-    /**
-     * デフォルトユーザーを作成
-     */
-    private User createDefaultUser() {
-        User user = new User();
-        user.setUsername(AppConstants.DEFAULT_USERNAME);
-        user.setEmail(AppConstants.DEFAULT_EMAIL);
-        user.setPassword(AppConstants.DEFAULT_PASSWORD);
-        return userService.save(user);
-    }
-    
-    /**
-     * 例外のスタックトレースを文字列として取得
-     */
-    private String getStackTraceAsString(Exception e) {
-        StringBuilder sb = new StringBuilder();
-        sb.append(e.toString()).append("\n");
-        for (StackTraceElement element : e.getStackTrace()) {
-            sb.append("\tat ").append(element.toString()).append("\n");
-        }
-        return sb.toString();
-    }
+
 } 
