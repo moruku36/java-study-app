@@ -5,13 +5,13 @@ spring:
     username: ${DATABASE_USERNAME:mydb_t10f_user}
     password: ${DATABASE_PASSWORD:eGZOMQiK0TTp9MBUxDPdF63PCip5fa0A}
     driver-class-name: org.postgresql.Driver
-    # 接続プール設定（PostgreSQL最適化）
+    # 接続プール設定（最小限）
     hikari:
-      maximum-pool-size: 5
-      minimum-idle: 2
+      maximum-pool-size: 2
+      minimum-idle: 1
       connection-timeout: 30000
-      idle-timeout: 600000
-      max-lifetime: 1800000
+      idle-timeout: 300000
+      max-lifetime: 600000
       connection-test-query: SELECT 1
       validation-timeout: 5000
       leak-detection-threshold: 60000
@@ -36,21 +36,17 @@ spring:
     lazy-initialization: false
     banner-mode: off
   
-  # JPA設定（PostgreSQL最適化）
+  # JPA設定（安定化）
   jpa:
     hibernate:
       ddl-auto: update
-    show-sql: false
+    show-sql: true
     properties:
       hibernate:
-        format_sql: false
-        # PostgreSQL最適化設定
+        format_sql: true
+        # 基本的な設定のみ
         jdbc:
-          batch_size: 20
-          batch_versioned_data: true
-        # トランザクション管理
-        connection:
-          provider_disables_autocommit: false
+          batch_size: 10
 
 # サーバー設定
 server:

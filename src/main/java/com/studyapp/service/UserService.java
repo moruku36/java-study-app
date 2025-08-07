@@ -61,4 +61,8 @@ public class UserService {
     public boolean validatePassword(String rawPassword, String encodedPassword) {
         return passwordEncoder.matches(rawPassword, encodedPassword);
     }
+    
+    public long count() {
+        return userRepository.count();
+    }
 } 

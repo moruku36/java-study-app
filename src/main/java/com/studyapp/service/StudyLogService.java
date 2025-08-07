@@ -126,4 +126,8 @@ public class StudyLogService {
     public void deleteById(Long id) {
         studyLogRepository.deleteById(id);
     }
+    
+    public long count() {
+        return studyLogRepository.count();
+    }
 } 
