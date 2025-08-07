@@ -1,29 +1,88 @@
 spring:
-  # データベース設定（本番環境）
+  # データベース設定（本番環境 - PostgreSQL）
   datasource:
+    url: ${DATABASE_URL:jdbc:postgresql://dpg-d285h0ggjchc738ul2s0-a.oregon-postgres.render.com:5432/mydb_t10f?sslmode=require}
+    username: ${DATABASE_USERNAME:mydb_t10f_user}
+    password: ${DATABASE_PASSWORD:eGZOMQiK0TTp9MBUxDPdF63PCip5fa0A}
     driver-class-name: org.postgresql.Driver
+    # 接続プール設定（起動最適化）
+    hikari:
+      maximum-pool-size: 1
+      minimum-idle: 1
+      connection-timeout: 20000
+      idle-timeout: 300000
+      max-lifetime: 600000
+      connection-test-query: SELECT 1
+      validation-timeout: 3000
+      leak-detection-threshold: 30000
+
+  # Thymeleaf設定（本番環境）
+  thymeleaf:
+    cache: true
+    mode: HTML
+
+  # H2コンソール無効化（本番環境）
+  h2:
+    console:
+      enabled: false
+
+  # データ初期化無効化（起動高速化）
+  data:
+    init:
+      enabled: false
   
+  # 起動時間短縮のための設定
+  main:
+    lazy-initialization: false
+    banner-mode: off
+  
+  # JPA設定（起動最適化）
   jpa:
     hibernate:
       ddl-auto: update
     show-sql: false
     properties:
       hibernate:
-        dialect: org.hibernate.dialect.PostgreSQLDialect
         format_sql: false
-  
-  # Thymeleaf設定（本番環境）
-  thymeleaf:
-    cache: true
-  
-  # H2コンソール無効化
-  h2:
-    console:
-      enabled: false
+        # 起動最適化設定
+        jdbc:
+          batch_size: 5
 
-# ログ設定（本番環境）
+# サーバー設定（起動最適化）
+server:
+  port: ${PORT:8080}
+  compression:
+    enabled: false
+  tomcat:
+    threads:
+      max: 20
+      min-spare: 5
+    connection-timeout: 10000
+
+# ログ設定（本番環境 - 最小限）
 logging:
   level:
-    com.studyapp: INFO
-    org.springframework: WARN
-    root: WARN 
+    com.studyapp: ${LOG_LEVEL:INFO}
+    org.springframework: ${SPRING_LOG_LEVEL:WARN}
+    org.hibernate.SQL: ${HIBERNATE_SQL_LOG:WARN}
+    org.hibernate.type.descriptor.sql.BasicBinder: ${HIBERNATE_BINDER_LOG:WARN}
+    org.springframework.orm.jpa: ${JPA_LOG_LEVEL:WARN}
+    org.springframework.transaction: ${TRANSACTION_LOG_LEVEL:WARN}
+    org.springframework.boot: ${BOOT_LOG_LEVEL:INFO}
+    org.springframework.context: ${CONTEXT_LOG_LEVEL:WARN}
+    org.springframework.beans: ${BEANS_LOG_LEVEL:WARN}
+    root: ${ROOT_LOG_LEVEL:WARN}
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+
+# 管理エンドポイント設定（最小限）
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health
+      base-path: /actuator
+  endpoint:
+    health:
+      show-details: never
+      show-components: never 

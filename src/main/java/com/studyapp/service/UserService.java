@@ -14,13 +14,11 @@ import java.util.Optional;
 @Transactional
 public class UserService {
     
-    private final UserRepository userRepository;
-    private final PasswordEncoder passwordEncoder;
+    @Autowired
+    private UserRepository userRepository;
     
-    public UserService(UserRepository userRepository, PasswordEncoder passwordEncoder) {
-        this.userRepository = userRepository;
-        this.passwordEncoder = passwordEncoder;
-    }
+    @Autowired
+    private PasswordEncoder passwordEncoder;
     
     public List<User> findAll() {
         return userRepository.findAll();
@@ -60,9 +58,5 @@ public class UserService {
     
     public boolean validatePassword(String rawPassword, String encodedPassword) {
         return passwordEncoder.matches(rawPassword, encodedPassword);
-    }
-    
-    public long count() {
-        return userRepository.count();
     }
 } 
