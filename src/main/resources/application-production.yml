@@ -1,20 +1,20 @@
 spring:
   # データベース設定（本番環境 - PostgreSQL）
   datasource:
-    url: ${DATABASE_URL:jdbc:postgresql://dpg-d285h0ggjchc738ul2s0-a.oregon-postgres.render.com/mydb_t10f?sslmode=require}
+    url: ${DATABASE_URL:jdbc:postgresql://dpg-d285h0ggjchc738ul2s0-a.oregon-postgres.render.com:5432/mydb_t10f?sslmode=require}
     username: ${DATABASE_USERNAME:mydb_t10f_user}
     password: ${DATABASE_PASSWORD:eGZOMQiK0TTp9MBUxDPdF63PCip5fa0A}
     driver-class-name: org.postgresql.Driver
-    # 接続プール設定（シンプル化）
+    # 接続プール設定（PostgreSQL最適化）
     hikari:
-      maximum-pool-size: 3
-      minimum-idle: 1
-      connection-timeout: 20000
-      idle-timeout: 300000
-      max-lifetime: 600000
+      maximum-pool-size: 5
+      minimum-idle: 2
+      connection-timeout: 30000
+      idle-timeout: 600000
+      max-lifetime: 1800000
       connection-test-query: SELECT 1
-      validation-timeout: 3000
-      leak-detection-threshold: 30000
+      validation-timeout: 5000
+      leak-detection-threshold: 60000
 
   # Thymeleaf設定（本番環境）
   thymeleaf:
@@ -36,7 +36,7 @@ spring:
     lazy-initialization: false
     banner-mode: off
   
-  # JPA設定（シンプル化）
+  # JPA設定（PostgreSQL最適化）
   jpa:
     hibernate:
       ddl-auto: update
@@ -44,9 +44,13 @@ spring:
     properties:
       hibernate:
         format_sql: false
-        # 基本的な設定のみ
+        # PostgreSQL最適化設定
         jdbc:
-          batch_size: 10
+          batch_size: 20
+          batch_versioned_data: true
+        # トランザクション管理
+        connection:
+          provider_disables_autocommit: false
 
 # サーバー設定
 server:
@@ -60,15 +64,15 @@ server:
       min-spare: 10
     connection-timeout: 20000
 
-# ログ設定（本番環境 - 安定化）
+# ログ設定（本番環境 - デバッグ用）
 logging:
   level:
-    com.studyapp: ${LOG_LEVEL:INFO}
+    com.studyapp: ${LOG_LEVEL:DEBUG}
     org.springframework: ${SPRING_LOG_LEVEL:INFO}
-    org.hibernate.SQL: ${HIBERNATE_SQL_LOG:INFO}
-    org.hibernate.type.descriptor.sql.BasicBinder: ${HIBERNATE_BINDER_LOG:INFO}
-    org.springframework.orm.jpa: ${JPA_LOG_LEVEL:INFO}
-    org.springframework.transaction: ${TRANSACTION_LOG_LEVEL:INFO}
+    org.hibernate.SQL: ${HIBERNATE_SQL_LOG:DEBUG}
+    org.hibernate.type.descriptor.sql.BasicBinder: ${HIBERNATE_BINDER_LOG:TRACE}
+    org.springframework.orm.jpa: ${JPA_LOG_LEVEL:DEBUG}
+    org.springframework.transaction: ${TRANSACTION_LOG_LEVEL:DEBUG}
     org.springframework.boot: ${BOOT_LOG_LEVEL:INFO}
     org.springframework.context: ${CONTEXT_LOG_LEVEL:INFO}
     org.springframework.beans: ${BEANS_LOG_LEVEL:INFO}
