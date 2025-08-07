@@ -1,12 +1,6 @@
 package com.studyapp.controller;
 
-import com.studyapp.domain.LearningGoal;
-import com.studyapp.domain.StudyLog;
 import com.studyapp.domain.User;
-import com.studyapp.dto.WeeklyProgressDto;
-import com.studyapp.service.LearningGoalService;
-import com.studyapp.service.StudyLogService;
-import com.studyapp.service.UserService;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -22,17 +16,7 @@ public class WebController {
     
     private static final Logger logger = LoggerFactory.getLogger(WebController.class);
     
-    private final UserService userService;
-    private final LearningGoalService learningGoalService;
-    private final StudyLogService studyLogService;
-    
-    public WebController(UserService userService, 
-                        LearningGoalService learningGoalService, 
-                        StudyLogService studyLogService) {
-        this.userService = userService;
-        this.learningGoalService = learningGoalService;
-        this.studyLogService = studyLogService;
-    }
+
     
     @GetMapping("/")
     public String index() {
@@ -66,7 +50,7 @@ public class WebController {
         
         model.addAttribute("user", user);
         model.addAttribute("goals", new ArrayList<>());
-        model.addAttribute("newGoal", new LearningGoal());
+        model.addAttribute("newGoal", null);
         
         return "goals";
     }
@@ -79,7 +63,7 @@ public class WebController {
         user.setEmail("sample@example.com");
         
         model.addAttribute("user", user);
-        model.addAttribute("studyLog", new StudyLog());
+        model.addAttribute("studyLog", null);
         model.addAttribute("today", LocalDate.now());
         
         return "log";
@@ -105,7 +89,12 @@ public class WebController {
     
     @GetMapping("/register")
     public String registerForm(Model model) {
-        model.addAttribute("user", new User());
+        User user = new User();
+        user.setId(1L);
+        user.setUsername("");
+        user.setEmail("");
+        user.setPassword("");
+        model.addAttribute("user", user);
         return "register";
     }
     
@@ -122,7 +111,7 @@ public class WebController {
         
         model.addAttribute("success", "学習記録を保存しました");
         model.addAttribute("user", user);
-        model.addAttribute("studyLog", new StudyLog());
+        model.addAttribute("studyLog", null);
         model.addAttribute("today", LocalDate.now());
         
         return "log";
