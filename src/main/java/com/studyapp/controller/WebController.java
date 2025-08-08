@@ -237,13 +237,22 @@ public class WebController {
     public String processLogin() { return "redirect:/dashboard"; }
 
     private User getOrCreateDefault(Long userId) {
-        return userService.findById(userId).orElseGet(() -> {
-            // 初回アクセス時にデフォルトユーザーを作成
-            User u = new User();
-            u.setUsername("sample_user");
-            u.setEmail("sample@example.com");
-            u.setPassword("password123");
-            return userService.save(u);
-        });
+        // 指定IDがあればそれを返す
+        if (userId != null) {
+            var byId = userService.findById(userId);
+            if (byId.isPresent()) return byId.get();
+        }
+        // 既存ユーザーがいれば最初のものを返す
+        List<User> all = userService.findAll();
+        if (all != null && !all.isEmpty()) {
+            return all.get(0);
+        }
+        // なければ一意なデフォルトユーザーを作成
+        long ts = System.currentTimeMillis();
+        User u = new User();
+        u.setUsername("sample_user_" + ts);
+        u.setEmail("sample_" + ts + "@example.com");
+        u.setPassword("password123");
+        return userService.save(u);
     }
 } 
