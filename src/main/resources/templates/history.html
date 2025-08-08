@@ -160,7 +160,7 @@
                                 期間選択
                             </h5>
                             <form th:action="@{/history}" method="get" class="row g-3">
-                                <input type="hidden" name="userId" th:value="${user.id}">
+                                <input type="hidden" name="userId" th:value="${user != null ? user.id : 1}">
                                 <div class="col-md-4">
                                     <label for="startDate" class="form-label">開始日</label>
                                     <input type="date" class="form-control" id="startDate" name="startDate" th:value="${#temporals.format(startDate, 'yyyy-MM-dd')}">
@@ -185,22 +185,22 @@
                             <h5 class="card-title">
                                 <i class="fas fa-list me-2"></i>
                                 学習記録
-                                <span class="badge bg-primary ms-2" th:text="${logs.size()} + '件'"></span>
+                                <span class="badge bg-primary ms-2" th:text="${logs != null ? logs.size() : 0} + '件'"></span>
                             </h5>
                             
-                            <div th:if="${logs.empty}" class="text-center py-4">
+                            <div th:if="${logs == null or #lists.isEmpty(logs)}" class="text-center py-4">
                                 <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
                                 <p class="text-muted">この期間の学習記録はありません</p>
                             </div>
                             
-                            <div th:if="${!logs.empty}">
+                            <div th:if="${logs != null and !#lists.isEmpty(logs)}">
                                 <div class="row">
                                     <div class="col-md-8">
                                         <!-- 学習記録リスト -->
                                         <div th:each="log : ${logs}" class="log-item">
                                             <div class="d-flex justify-content-between align-items-start">
                                                 <div>
-                                                    <div class="log-date" th:text="${#temporals.format(log.studyDate, 'yyyy年MM月dd日 (E)', 'ja')}">2024年01月01日 (月)</div>
+                                                    <div class="log-date" th:text="${#temporals.format(log.studyDate, 'yyyy/MM/dd')}">2024/01/01</div>
                                                     <div th:if="${log.notes}" class="text-muted mt-1" th:text="${log.notes}">学習内容のメモ</div>
                                                 </div>
                                                 <div class="text-end">
