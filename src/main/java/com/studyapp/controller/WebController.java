@@ -43,6 +43,11 @@ public class WebController {
             User user = getOrCreateDefault(userId);
             model.addAttribute("user", user);
 
+            // アクティブ目標
+            List<LearningGoal> activeGoals = new ArrayList<>();
+            try { activeGoals = learningGoalService.findActiveGoalsByUserId(user.getId()); } catch (Exception ignored) {}
+            model.addAttribute("activeGoals", activeGoals);
+
             // 週次進捗
             List<WeeklyProgressDto> weeklyProgress = new ArrayList<>();
             try {
@@ -78,7 +83,7 @@ public class WebController {
                     .mapToInt(l -> l.getMinutesStudied() == null ? 0 : l.getMinutesStudied()).sum();
             model.addAttribute("todayTotal", todayTotal);
 
-            // 平均達成率（週次進捗から）
+            // 平均達成率
             double avg = 0.0;
             if (weeklyProgress != null && !weeklyProgress.isEmpty()) {
                 avg = weeklyProgress.stream()
@@ -92,14 +97,14 @@ public class WebController {
             logger.error("dashboard load error", e);
             model.addAttribute("hasError", true);
             model.addAttribute("errorMessage", "ダッシュボードの読み込み中にエラーが発生しました");
-            // 最低限のモデル
             User fallback = new User();
             fallback.setId(userId);
             fallback.setUsername("sample_user");
             fallback.setEmail("sample@example.com");
             model.addAttribute("user", fallback);
-            model.addAttribute("weeklyProgress", new ArrayList<>());
-            model.addAttribute("todayLogs", new ArrayList<>());
+            model.addAttribute("activeGoals", new ArrayList<LearningGoal>());
+            model.addAttribute("weeklyProgress", new ArrayList<WeeklyProgressDto>());
+            model.addAttribute("todayLogs", new ArrayList<StudyLog>());
             model.addAttribute("weeklyTotal", 0);
             model.addAttribute("todayTotal", 0);
             model.addAttribute("averageAchievement", "0.0");
@@ -111,10 +116,49 @@ public class WebController {
     public String goals(@RequestParam(defaultValue = "1") Long userId, Model model) {
         User user = getOrCreateDefault(userId);
         model.addAttribute("user", user);
-        // 画面はJS(localStorage)で描画するため最低限
-        model.addAttribute("goals", new ArrayList<LearningGoal>());
-        model.addAttribute("newGoal", null);
+        List<LearningGoal> goals = learningGoalService.findByUserId(user.getId());
+        model.addAttribute("goals", goals);
+        model.addAttribute("newGoal", new LearningGoal());
         return "goals";
+    }
+
+    @PostMapping("/goals/create")
+    public String createGoal(@RequestParam Long userId,
+                             @RequestParam String subject,
+                             @RequestParam Integer dailyTargetMinutes,
+                             @RequestParam String startDate,
+                             @RequestParam(required = false) String endDate) {
+        User user = getOrCreateDefault(userId);
+        LearningGoal goal = new LearningGoal();
+        goal.setUser(user);
+        goal.setSubject(subject);
+        goal.setDailyTargetMinutes(dailyTargetMinutes);
+        goal.setStartDate(LocalDate.parse(startDate));
+        if (endDate != null && !endDate.isBlank()) goal.setEndDate(LocalDate.parse(endDate));
+        goal.setIsActive(true);
+        learningGoalService.save(goal);
+        return "redirect:/goals?userId=" + user.getId();
+    }
+
+    @PostMapping("/goals/{id}/deactivate")
+    public String deactivateGoal(@PathVariable Long id, @RequestParam Long userId) {
+        LearningGoal goal = learningGoalService.findByUserId(userId).stream().filter(g -> g.getId().equals(id)).findFirst().orElse(null);
+        if (goal != null) { goal.setIsActive(false); learningGoalService.save(goal); }
+        return "redirect:/goals?userId=" + userId;
+    }
+
+    @PostMapping("/goals/{id}/activate")
+    public String activateGoal(@PathVariable Long id, @RequestParam Long userId) {
+        LearningGoal goal = learningGoalService.findByUserId(userId).stream().filter(g -> g.getId().equals(id)).findFirst().orElse(null);
+        if (goal != null) { goal.setIsActive(true); learningGoalService.save(goal); }
+        return "redirect:/goals?userId=" + userId;
+    }
+
+    @PostMapping("/goals/{id}/delete")
+    public String deleteGoal(@PathVariable Long id, @RequestParam Long userId) {
+        // 簡易削除: 学習目標サービスに削除APIがないためリポジトリに委譲しても良いがここでは非対応。
+        // 代替: 非アクティブ化相当
+        return deactivateGoal(id, userId);
     }
 
     @GetMapping("/log")
@@ -133,9 +177,18 @@ public class WebController {
                          Model model) {
         User user = getOrCreateDefault(userId);
         model.addAttribute("user", user);
-        model.addAttribute("logs", new ArrayList<StudyLog>());
-        model.addAttribute("startDate", LocalDate.now().minusWeeks(1));
-        model.addAttribute("endDate", LocalDate.now());
+        LocalDate start = startDate != null && !startDate.isBlank() ? LocalDate.parse(startDate) : LocalDate.now().minusWeeks(1);
+        LocalDate end = endDate != null && !endDate.isBlank() ? LocalDate.parse(endDate) : LocalDate.now();
+        List<StudyLog> logs = studyLogService.findByUserIdAndDateRange(user.getId(), start, end);
+        int totalMinutes = logs == null ? 0 : logs.stream().mapToInt(l -> l.getMinutesStudied() == null ? 0 : l.getMinutesStudied()).sum();
+        int dayCount = logs == null ? 0 : logs.size();
+        int avgPerDay = dayCount > 0 ? Math.round((float) totalMinutes / dayCount) : 0;
+        model.addAttribute("logs", logs);
+        model.addAttribute("startDate", start);
+        model.addAttribute("endDate", end);
+        model.addAttribute("totalMinutes", totalMinutes);
+        model.addAttribute("dayCount", dayCount);
+        model.addAttribute("avgPerDay", avgPerDay);
         return "history";
     }
 

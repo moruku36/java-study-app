@@ -159,15 +159,15 @@
                                 <i class="fas fa-calendar me-2"></i>
                                 期間選択
                             </h5>
-                            <form action="/history" method="get" class="row g-3">
-                                <input type="hidden" name="userId" value="1">
+                            <form th:action="@{/history}" method="get" class="row g-3">
+                                <input type="hidden" name="userId" th:value="${user.id}">
                                 <div class="col-md-4">
                                     <label for="startDate" class="form-label">開始日</label>
-                                    <input type="date" class="form-control" id="startDate" name="startDate" >
+                                    <input type="date" class="form-control" id="startDate" name="startDate" th:value="${#temporals.format(startDate, 'yyyy-MM-dd')}">
                                 </div>
                                 <div class="col-md-4">
                                     <label for="endDate" class="form-label">終了日</label>
-                                    <input type="date" class="form-control" id="endDate" name="endDate" >
+                                    <input type="date" class="form-control" id="endDate" name="endDate" th:value="${#temporals.format(endDate, 'yyyy-MM-dd')}">
                                 </div>
                                 <div class="col-md-4 d-flex align-items-end">
                                     <button type="submit" class="btn btn-primary">
@@ -185,26 +185,26 @@
                             <h5 class="card-title">
                                 <i class="fas fa-list me-2"></i>
                                 学習記録
-                                <span class="badge bg-primary ms-2">0件</span>
+                                <span class="badge bg-primary ms-2" th:text="${logs.size()} + '件'"></span>
                             </h5>
                             
-                            <div class="text-center py-4">
+                            <div th:if="${logs.empty}" class="text-center py-4">
                                 <i class="fas fa-inbox fa-3x text-muted mb-3"></i>
                                 <p class="text-muted">この期間の学習記録はありません</p>
                             </div>
                             
-                            <div>
+                            <div th:if="${!logs.empty}">
                                 <div class="row">
                                     <div class="col-md-8">
                                         <!-- 学習記録リスト -->
                                         <div th:each="log : ${logs}" class="log-item">
                                             <div class="d-flex justify-content-between align-items-start">
                                                 <div>
-                                                    <div class="log-date">2024年01月01日 (月)</div>
-                                                    <div class="text-muted mt-1">学習内容のメモ</div>
+                                                    <div class="log-date" th:text="${#temporals.format(log.studyDate, 'yyyy年MM月dd日 (E)', 'ja')}">2024年01月01日 (月)</div>
+                                                    <div th:if="${log.notes}" class="text-muted mt-1" th:text="${log.notes}">学習内容のメモ</div>
                                                 </div>
                                                 <div class="text-end">
-                                                    <div class="log-minutes">60分</div>
+                                                    <div class="log-minutes" th:text="${log.minutesStudied} + '分'">60分</div>
                                                 </div>
                                             </div>
                                         </div>
@@ -221,19 +221,19 @@
                                                 <div class="mb-3">
                                                     <div class="d-flex justify-content-between">
                                                         <span>総学習時間:</span>
-                                                        <strong>0分</strong>
+                                                        <strong th:text="${totalMinutes} + '分'">0分</strong>
                                                     </div>
                                                 </div>
                                                 <div class="mb-3">
                                                     <div class="d-flex justify-content-between">
                                                         <span>学習日数:</span>
-                                                        <strong>0日</strong>
+                                                        <strong th:text="${dayCount} + '日'">0日</strong>
                                                     </div>
                                                 </div>
                                                 <div>
                                                     <div class="d-flex justify-content-between">
                                                         <span>1日平均:</span>
-                                                        <strong>0分</strong>
+                                                        <strong th:text="${avgPerDay} + '分'">0分</strong>
                                                     </div>
                                                 </div>
                                             </div>
