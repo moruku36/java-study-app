@@ -171,9 +171,6 @@
                                             </div>
                                             <div class="h5 mb-0 font-weight-bold">
                                                 <span th:text="${weeklyTotal}">0</span> 分
-                                                <small class="d-block text-white-50" th:if="${#strings.contains(#httpServletRequest.queryString, 't')}">
-                                                    <i class="fas fa-sync-alt me-1"></i>更新済み
-                                                </small>
                                             </div>
                                         </div>
                                         <div class="col-auto">
@@ -213,11 +210,8 @@
                                                 今日の学習時間
                                             </div>
                                             <div class="h5 mb-0 font-weight-bold">
-                                                <span th:if="${hasError}" class="text-warning">
-                                                    <i class="fas fa-exclamation-triangle me-1"></i>データ取得エラー
-                                                </span>
-                                                <span th:unless="${hasError}" th:with="totalMinutes=${todayLogs != null ? todayLogs.stream().mapToInt(log -> log.getMinutesStudied() != null ? log.getMinutesStudied() : 0).sum() : 0}" th:text="${totalMinutes}">0</span>
-                                                <span th:unless="${hasError}"> 分</span>
+                                                <span>0</span>
+                                                <span> 分</span>
                                             </div>
                                         </div>
                                         <div class="col-auto">
@@ -237,7 +231,7 @@
                                                 平均達成率
                                             </div>
                                             <div class="h5 mb-0 font-weight-bold">
-                                                <span th:text="${weeklyProgress != null and !weeklyProgress.isEmpty() ? #numbers.formatDecimal(weeklyProgress.stream().mapToDouble(p -> p.getAchievementRate() != null ? p.getAchievementRate() : 0).average().orElse(0), 1, 1) : '0.0'}">0</span>%
+                                                <span>0.0</span>%
                                             </div>
                                         </div>
                                         <div class="col-auto">
@@ -348,7 +342,7 @@
         // Weekly Progress Chart
         const ctx = document.getElementById('weeklyProgressChart').getContext('2d');
         
-        const weeklyData = /*[[${weeklyProgress}]]*/ [];
+        const weeklyData = [];
         const labels = weeklyData ? weeklyData.map(item => item.dayOfWeek || '') : [];
         const data = weeklyData ? weeklyData.map(item => item.minutesStudied || 0) : [];
         const targetData = weeklyData ? weeklyData.map(item => item.targetMinutes || 0) : [];
