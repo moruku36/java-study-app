@@ -84,13 +84,15 @@ public class WebController {
             model.addAttribute("todayTotal", todayTotal);
 
             // 平均達成率
-            double avg = 0.0;
+            java.math.BigDecimal avg = java.math.BigDecimal.ZERO;
             if (weeklyProgress != null && !weeklyProgress.isEmpty()) {
-                avg = weeklyProgress.stream()
+                double averageDouble = weeklyProgress.stream()
                         .mapToDouble(p -> p.getAchievementRate() == null ? 0.0 : p.getAchievementRate())
                         .average().orElse(0.0);
+                avg = new java.math.BigDecimal(Double.toString(averageDouble))
+                        .setScale(1, java.math.RoundingMode.HALF_UP);
             }
-            model.addAttribute("averageAchievement", String.format("%.1f", avg));
+            model.addAttribute("averageAchievement", avg.toPlainString());
 
             model.addAttribute("hasError", false);
         } catch (Exception e) {
@@ -156,9 +158,8 @@ public class WebController {
 
     @PostMapping("/goals/{id}/delete")
     public String deleteGoal(@PathVariable Long id, @RequestParam Long userId) {
-        // 簡易削除: 学習目標サービスに削除APIがないためリポジトリに委譲しても良いがここでは非対応。
-        // 代替: 非アクティブ化相当
-        return deactivateGoal(id, userId);
+        learningGoalService.logicalDelete(id);
+        return "redirect:/goals?userId=" + userId;
     }
 
     @GetMapping("/log")

@@ -7,6 +7,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.time.LocalDateTime;
 
 @Service
 @Transactional
@@ -27,4 +28,18 @@ public class LearningGoalService {
     }
 
     public LearningGoal save(LearningGoal goal) { return learningGoalRepository.save(goal); }
+
+    public LearningGoal findNotDeletedById(Long id) {
+        return learningGoalRepository.findNotDeletedById(id);
+    }
+
+    public void logicalDelete(Long id) {
+        LearningGoal goal = learningGoalRepository.findById(id).orElse(null);
+        if (goal != null) {
+            goal.setIsDeleted(true);
+            goal.setIsActive(false);
+            goal.setDeletedAt(LocalDateTime.now());
+            learningGoalRepository.save(goal);
+        }
+    }
 }

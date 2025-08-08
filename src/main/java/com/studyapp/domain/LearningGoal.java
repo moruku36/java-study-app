@@ -37,6 +37,14 @@ public class LearningGoal {
     @Column(name = "is_active")
     private Boolean isActive = true;
 
+    // 論理削除フラグ
+    @Column(name = "is_deleted")
+    private Boolean isDeleted = false;
+
+    // 論理削除日時
+    @Column(name = "deleted_at")
+    private LocalDateTime deletedAt;
+
     @Column(name = "created_at")
     private LocalDateTime createdAt;
 
@@ -59,6 +67,10 @@ public class LearningGoal {
     public void setEndDate(LocalDate endDate) { this.endDate = endDate; }
     public Boolean getIsActive() { return isActive; }
     public void setIsActive(Boolean isActive) { this.isActive = isActive; }
+    public Boolean getIsDeleted() { return isDeleted; }
+    public void setIsDeleted(Boolean isDeleted) { this.isDeleted = isDeleted; }
+    public LocalDateTime getDeletedAt() { return deletedAt; }
+    public void setDeletedAt(LocalDateTime deletedAt) { this.deletedAt = deletedAt; }
     public LocalDateTime getCreatedAt() { return createdAt; }
     public void setCreatedAt(LocalDateTime createdAt) { this.createdAt = createdAt; }
     public LocalDateTime getUpdatedAt() { return updatedAt; }

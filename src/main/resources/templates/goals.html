@@ -197,6 +197,10 @@
                                                     <input type="hidden" name="userId" th:value="${user.id}">
                                                     <button type="submit" class="btn btn-outline-success btn-sm"><i class="fas fa-play"></i></button>
                                                 </form>
+                                                <form th:action="@{'/goals/' + ${goal.id} + '/delete'}" method="post" class="d-inline">
+                                                    <input type="hidden" name="userId" th:value="${user.id}">
+                                                    <button type="submit" class="btn btn-outline-danger btn-sm" onclick="return confirm('この目標を削除しますか？（論理削除）');"><i class="fas fa-trash"></i></button>
+                                                </form>
                                             </div>
                                         </div>
                                     </div>

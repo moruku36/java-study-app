@@ -1,6 +1,8 @@
 package com.studyapp.dto;
 
 import java.time.LocalDate;
+import java.math.BigDecimal;
+import java.math.RoundingMode;
 
 public class WeeklyProgressDto {
     private LocalDate date;
@@ -21,7 +23,13 @@ public class WeeklyProgressDto {
 
     private Double calculate() {
         if (targetMinutes == 0) return 0.0;
-        return (double) minutesStudied / targetMinutes * 100;
+        BigDecimal studied = BigDecimal.valueOf(minutesStudied);
+        BigDecimal target = BigDecimal.valueOf(targetMinutes);
+        return studied
+                .divide(target, 6, RoundingMode.HALF_UP)
+                .multiply(BigDecimal.valueOf(100))
+                .setScale(1, RoundingMode.HALF_UP)
+                .doubleValue();
     }
 
     public LocalDate getDate() { return date; }
