@@ -272,12 +272,27 @@
                                     </h5>
                                 </div>
                                 <div class="card-body">
-                                    <div id="activeGoalsEmpty" class="text-center text-muted d-none">
+                                    <!-- 空状態 -->
+                                    <div th:if="${activeGoals == null or activeGoals.isEmpty()}" class="text-center text-muted">
                                         <i class="fas fa-info-circle fa-2x mb-3"></i>
                                         <p>アクティブな学習目標がありません</p>
                                         <a href="/goals?userId=1" class="btn btn-primary btn-sm">目標を作成</a>
                                     </div>
-                                    <div id="activeGoalsList"></div>
+
+                                    <!-- 目標リスト -->
+                                    <div th:if="${activeGoals != null and !activeGoals.isEmpty()}">
+                                        <div th:each="goal : ${activeGoals}" class="mb-3 pb-2 border-bottom">
+                                            <div class="d-flex justify-content-between align-items-start">
+                                                <div>
+                                                    <strong th:text="${goal.subject}">科目名</strong>
+                                                    <div class="text-muted small mt-1">
+                                                        目標: <span th:text="${goal.dailyTargetMinutes}">0</span> 分/日
+                                                    </div>
+                                                </div>
+                                                <a href="/goals?userId=1" class="btn btn-outline-primary btn-sm">詳細</a>
+                                            </div>
+                                        </div>
+                                    </div>
                                 </div>
                             </div>
                         </div>
