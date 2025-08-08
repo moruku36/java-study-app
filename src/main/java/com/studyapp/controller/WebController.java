@@ -156,17 +156,17 @@ public class WebController {
                               @RequestParam Integer minutesStudied,
                               @RequestParam(required = false) String notes,
                               Model model) {
-        User user = new User();
-        user.setId(userId);
-        user.setUsername("sample_user");
-        user.setEmail("sample@example.com");
-
-        model.addAttribute("success", "学習記録を保存しました");
-        model.addAttribute("user", user);
-        model.addAttribute("studyLog", null);
-        model.addAttribute("today", LocalDate.now());
-
-        return "log";
+        try {
+            LocalDate date = LocalDate.parse(studyDate);
+            studyLogService.logStudy(userId, date, minutesStudied, notes);
+            return "redirect:/dashboard?userId=" + userId;
+        } catch (Exception e) {
+            User user = getOrCreateDefault(userId);
+            model.addAttribute("user", user);
+            model.addAttribute("error", "学習記録の保存に失敗しました: " + e.getMessage());
+            model.addAttribute("today", LocalDate.now());
+            return "log";
+        }
     }
 
     @PostMapping("/register")
