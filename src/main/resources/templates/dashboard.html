@@ -190,7 +190,7 @@
                                                 アクティブな目標
                                             </div>
                                             <div class="h5 mb-0 font-weight-bold">
-                                                <span id="activeGoalsCount">0</span> 個
+                                                <span th:text="${weeklyProgress != null ? weeklyProgress.size() : 0}">0</span> 個
                                             </div>
                                         </div>
                                         <div class="col-auto">
@@ -210,7 +210,7 @@
                                                 今日の学習時間
                                             </div>
                                             <div class="h5 mb-0 font-weight-bold">
-                                                <span>0</span>
+                                                <span th:text="${todayTotal}">0</span>
                                                 <span> 分</span>
                                             </div>
                                         </div>
@@ -231,7 +231,7 @@
                                                 平均達成率
                                             </div>
                                             <div class="h5 mb-0 font-weight-bold">
-                                                <span>0.0</span>%
+                                                <span th:text="${averageAchievement}">0.0</span>%
                                             </div>
                                         </div>
                                         <div class="col-auto">
