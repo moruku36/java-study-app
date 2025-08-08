@@ -130,5 +130,11 @@ public class WebController {
         return "login";
     }
     
+    @PostMapping("/login")
+    public String processLogin() {
+        // ログイン処理をバイパスして直接ダッシュボードにリダイレクト
+        return "redirect:/dashboard";
+    }
+    
 
 } 
