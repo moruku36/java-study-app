@@ -116,11 +116,30 @@ public class WebController {
 
     @GetMapping("/goals")
     public String goals(@RequestParam(defaultValue = "1") Long userId, Model model) {
-        User user = getOrCreateDefault(userId);
-        model.addAttribute("user", user);
-        List<LearningGoal> goals = learningGoalService.findByUserId(user.getId());
-        model.addAttribute("goals", goals);
-        model.addAttribute("newGoal", new LearningGoal());
+        try {
+            User user = getOrCreateDefault(userId);
+            model.addAttribute("user", user);
+            List<LearningGoal> goals = new ArrayList<>();
+            try {
+                goals = learningGoalService.findByUserId(user.getId());
+            } catch (Exception e) {
+                logger.warn("goals load failed: {}", e.getMessage());
+            }
+            model.addAttribute("goals", goals == null ? new ArrayList<>() : goals);
+            model.addAttribute("newGoal", new LearningGoal());
+            model.addAttribute("hasError", false);
+        } catch (Exception e) {
+            logger.error("goals page error", e);
+            model.addAttribute("hasError", true);
+            model.addAttribute("errorMessage", "学習目標の読み込み中にエラーが発生しました");
+            User fallback = new User();
+            fallback.setId(userId);
+            fallback.setUsername("sample_user");
+            fallback.setEmail("sample@example.com");
+            model.addAttribute("user", fallback);
+            model.addAttribute("goals", new ArrayList<LearningGoal>());
+            model.addAttribute("newGoal", new LearningGoal());
+        }
         return "goals";
     }
 
