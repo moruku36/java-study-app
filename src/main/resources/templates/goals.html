@@ -157,10 +157,10 @@
                         </div>
                     </div>
                     
-                    <!-- Goals List -->
+                    <!-- Goals List (JSで描画) -->
                     <div class="row">
                         <div class="col-12">
-                            <div th:if="${goals.isEmpty()}" class="text-center py-5">
+                            <div id="goalsEmpty" class="text-center py-5 d-none">
                                 <i class="fas fa-bullseye fa-3x text-muted mb-3"></i>
                                 <h4 class="text-muted">学習目標がありません</h4>
                                 <p class="text-muted">新しい学習目標を作成して、学習を始めましょう！</p>
@@ -169,49 +169,7 @@
                                     最初の目標を作成
                                 </button>
                             </div>
-                            
-                            <div th:each="goal : ${goals}" class="card goal-card mb-3" th:classappend="${!goal.isActive} ? 'inactive'">
-                                <div class="card-body">
-                                    <div class="row align-items-center">
-                                        <div class="col-md-8">
-                                            <div class="d-flex justify-content-between align-items-start mb-2">
-                                                <h5 class="card-title mb-0" th:text="${goal.subject}">科目名</h5>
-                                                <span class="badge" th:class="${goal.isActive} ? 'badge-active' : 'badge-inactive'"
-                                                      th:text="${goal.isActive} ? 'アクティブ' : '非アクティブ'">ステータス</span>
-                                            </div>
-                                            <p class="card-text text-muted mb-2">
-                                                <i class="fas fa-clock me-2"></i>
-                                                目標: <strong th:text="${goal.dailyTargetMinutes} + '分/日'">目標時間</strong>
-                                            </p>
-                                            <p class="card-text text-muted mb-0">
-                                                <i class="fas fa-calendar me-2"></i>
-                                                開始日: <span th:text="${#temporals.format(goal.startDate, 'yyyy/MM/dd')}">開始日</span>
-                                                <span th:if="${goal.endDate}" th:text="' - 終了日: ' + ${#temporals.format(goal.endDate, 'yyyy/MM/dd')}">終了日</span>
-                                            </p>
-                                        </div>
-                                        <div class="col-md-4 text-end">
-                                            <div class="btn-group" role="group">
-                                                <button type="button" class="btn btn-outline-primary btn-sm" 
-                                                        th:onclick="'editGoal(' + ${goal.id} + ')'">
-                                                    <i class="fas fa-edit"></i>
-                                                </button>
-                                                <button type="button" class="btn btn-outline-warning btn-sm" 
-                                                        th:if="${goal.isActive}" th:onclick="'deactivateGoal(' + ${goal.id} + ')'">
-                                                    <i class="fas fa-pause"></i>
-                                                </button>
-                                                <button type="button" class="btn btn-outline-success btn-sm" 
-                                                        th:unless="${goal.isActive}" th:onclick="'activateGoal(' + ${goal.id} + ')'">
-                                                    <i class="fas fa-play"></i>
-                                                </button>
-                                                <button type="button" class="btn btn-outline-danger btn-sm" 
-                                                        th:onclick="'deleteGoal(' + ${goal.id} + ')'">
-                                                    <i class="fas fa-trash"></i>
-                                                </button>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
-                            </div>
+                            <div id="goalsList"></div>
                         </div>
                     </div>
                 </div>
@@ -232,7 +190,7 @@
                 </div>
                 <div class="modal-body">
                     <form id="addGoalForm">
-                        <input type="hidden" name="userId" th:value="${user.id}">
+                        <input type="hidden" name="userId" value="1">
                         
                         <div class="mb-3">
                             <label for="subject" class="form-label">
@@ -290,44 +248,146 @@
     
     <!-- Custom JavaScript -->
     <script>
-        // 目標保存処理
+        const USER_ID = '1';
+        const STORAGE_KEY = `goals_user_${USER_ID}`;
+
+        function loadGoals() {
+            try {
+                const json = localStorage.getItem(STORAGE_KEY);
+                return json ? JSON.parse(json) : [];
+            } catch (e) {
+                console.error('Failed to load goals from localStorage', e);
+                return [];
+            }
+        }
+
+        function saveGoals(goals) {
+            try {
+                localStorage.setItem(STORAGE_KEY, JSON.stringify(goals));
+            } catch (e) {
+                console.error('Failed to save goals to localStorage', e);
+            }
+        }
+
+        function renderGoals() {
+            const container = document.getElementById('goalsList');
+            const empty = document.getElementById('goalsEmpty');
+            const goals = loadGoals();
+            container.innerHTML = '';
+            if (!goals || goals.length === 0) {
+                empty.classList.remove('d-none');
+                return;
+            }
+            empty.classList.add('d-none');
+            goals.forEach(goal => {
+                const inactiveClass = goal.isActive === false ? ' inactive' : '';
+                const statusBadge = goal.isActive === false ? 'badge-inactive' : 'badge-active';
+                const statusText = goal.isActive === false ? '非アクティブ' : 'アクティブ';
+                const start = goal.startDate ? goal.startDate.replaceAll('-', '/') : '';
+                const end = goal.endDate ? goal.endDate.replaceAll('-', '/') : '';
+                const card = document.createElement('div');
+                card.className = `card goal-card mb-3${inactiveClass}`;
+                card.innerHTML = `
+                    <div class="card-body">
+                        <div class="row align-items-center">
+                            <div class="col-md-8">
+                                <div class="d-flex justify-content-between align-items-start mb-2">
+                                    <h5 class="card-title mb-0">${goal.subject}</h5>
+                                    <span class="badge ${statusBadge}">${statusText}</span>
+                                </div>
+                                <p class="card-text text-muted mb-2">
+                                    <i class="fas fa-clock me-2"></i>
+                                    目標: <strong>${goal.dailyTargetMinutes}分/日</strong>
+                                </p>
+                                <p class="card-text text-muted mb-0">
+                                    <i class="fas fa-calendar me-2"></i>
+                                    開始日: <span>${start}</span>
+                                    ${end ? ` - 終了日: <span>${end}</span>` : ''}
+                                </p>
+                            </div>
+                            <div class="col-md-4 text-end">
+                                <div class="btn-group" role="group">
+                                    <button type="button" class="btn btn-outline-primary btn-sm" data-id="${goal.id}" onclick="editGoal('${goal.id}')">
+                                        <i class="fas fa-edit"></i>
+                                    </button>
+                                    ${goal.isActive !== false ? `
+                                        <button type="button" class="btn btn-outline-warning btn-sm" onclick="deactivateGoal('${goal.id}')">
+                                            <i class="fas fa-pause"></i>
+                                        </button>` : `
+                                        <button type="button" class="btn btn-outline-success btn-sm" onclick="activateGoal('${goal.id}')">
+                                            <i class="fas fa-play"></i>
+                                        </button>`}
+                                    <button type="button" class="btn btn-outline-danger btn-sm" onclick="deleteGoal('${goal.id}')">
+                                        <i class="fas fa-trash"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        </div>
+                    </div>`;
+                container.appendChild(card);
+            });
+        }
+
+        // 目標保存処理（localStorage）
         function saveGoal() {
-            alert('学習目標が正常に作成されました！（デモモード）');
+            const form = document.getElementById('addGoalForm');
+            const subject = form.subject.value.trim();
+            const minutes = parseInt(form.dailyTargetMinutes.value, 10);
+            const startDate = form.startDate.value;
+            const endDate = form.endDate.value;
+            if (!subject || !minutes || minutes < 1 || minutes > 1440 || !startDate) {
+                alert('入力内容を確認してください。');
+                return;
+            }
+            const goals = loadGoals();
+            const newGoal = {
+                id: `${Date.now()}`,
+                userId: USER_ID,
+                subject,
+                dailyTargetMinutes: minutes,
+                startDate,
+                endDate: endDate || null,
+                isActive: true
+            };
+            goals.push(newGoal);
+            saveGoals(goals);
+            renderGoals();
             // モーダルを閉じる
             const modal = bootstrap.Modal.getInstance(document.getElementById('addGoalModal'));
-            modal.hide();
+            modal && modal.hide();
+            form.reset();
         }
-        
-        // 目標編集処理
+
         function editGoal(goalId) {
-            // 実装予定
-            alert('編集機能は実装予定です。');
+            alert('編集機能はデモ簡易版のため省略しています。');
         }
-        
-        // 目標非アクティブ化処理
+
         function deactivateGoal(goalId) {
-            if (confirm('この目標を非アクティブにしますか？')) {
-                alert('目標が非アクティブになりました。（デモモード）');
-            }
+            const goals = loadGoals();
+            const g = goals.find(x => x.id === goalId);
+            if (g) { g.isActive = false; saveGoals(goals); renderGoals(); }
         }
-        
-        // 目標アクティブ化処理
+
         function activateGoal(goalId) {
-            alert('目標がアクティブになりました。（デモモード）');
+            const goals = loadGoals();
+            const g = goals.find(x => x.id === goalId);
+            if (g) { g.isActive = true; saveGoals(goals); renderGoals(); }
         }
-        
-        // 目標削除処理
+
         function deleteGoal(goalId) {
-            if (confirm('この目標を削除しますか？この操作は取り消せません。')) {
-                alert('目標が削除されました。（デモモード）');
-            }
+            if (!confirm('この目標を削除しますか？この操作は取り消せません。')) return;
+            let goals = loadGoals();
+            goals = goals.filter(x => x.id !== goalId);
+            saveGoals(goals);
+            renderGoals();
         }
-        
-        // ページ読み込み時の初期化
+
         document.addEventListener('DOMContentLoaded', function() {
             // 今日の日付を開始日に設定
             const today = new Date().toISOString().split('T')[0];
-            document.getElementById('startDate').value = today;
+            const startInput = document.getElementById('startDate');
+            if (startInput) startInput.value = today;
+            renderGoals();
         });
     </script>
 </body>

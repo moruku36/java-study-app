@@ -190,7 +190,7 @@
                                                 アクティブな目標
                                             </div>
                                             <div class="h5 mb-0 font-weight-bold">
-                                                <span th:text="${activeGoals.size()}">0</span> 個
+                                                <span id="activeGoalsCount">0</span> 個
                                             </div>
                                         </div>
                                         <div class="col-auto">
@@ -272,26 +272,12 @@
                                     </h5>
                                 </div>
                                 <div class="card-body">
-                                    <div th:if="${activeGoals == null or activeGoals.isEmpty()}" class="text-center text-muted">
+                                    <div id="activeGoalsEmpty" class="text-center text-muted d-none">
                                         <i class="fas fa-info-circle fa-2x mb-3"></i>
                                         <p>アクティブな学習目標がありません</p>
-                                        <a href="/goals?userId=1" class="btn btn-primary btn-sm">
-                                            目標を作成
-                                        </a>
+                                        <a href="/goals?userId=1" class="btn btn-primary btn-sm">目標を作成</a>
                                     </div>
-                                    
-                                    <div th:if="${activeGoals != null}" th:each="goal : ${activeGoals}" class="mb-3">
-                                        <div class="d-flex justify-content-between align-items-center mb-1">
-                                            <strong th:text="${goal.subject != null ? goal.subject : '未設定'}">科目名</strong>
-                                            <small class="text-muted" th:text="${goal.dailyTargetMinutes != null ? goal.dailyTargetMinutes : 0} + '分/日'">目標時間</small>
-                                        </div>
-                                        <div class="progress mb-2">
-                                            <div class="progress-bar" role="progressbar" style="width: 0%"></div>
-                                        </div>
-                                        <small class="text-muted">
-                                            開始日: <span th:text="${goal.startDate != null ? #temporals.format(goal.startDate, 'yyyy/MM/dd') : '未設定'}">開始日</span>
-                                        </small>
-                                    </div>
+                                    <div id="activeGoalsList"></div>
                                 </div>
                             </div>
                         </div>
@@ -370,22 +356,54 @@
             options: {
                 responsive: true,
                 maintainAspectRatio: false,
-                plugins: {
-                    legend: {
-                        position: 'top',
-                    }
-                },
-                scales: {
-                    y: {
-                        beginAtZero: true,
-                        title: {
-                            display: true,
-                            text: '学習時間（分）'
-                        }
-                    }
-                }
+                plugins: { legend: { position: 'top' } },
+                scales: { y: { beginAtZero: true, title: { display: true, text: '学習時間（分）' } } }
             }
         });
+
+        // Active Goals from localStorage
+        const USER_ID = '1';
+        const GOALS_KEY = `goals_user_${USER_ID}`;
+
+        function loadGoals() {
+            try {
+                const raw = localStorage.getItem(GOALS_KEY);
+                return raw ? JSON.parse(raw) : [];
+            } catch (e) {
+                console.error('loadGoals error', e);
+                return [];
+            }
+        }
+
+        function renderActiveGoalsOnDashboard() {
+            const goals = loadGoals().filter(g => g.isActive !== false);
+            const countEl = document.getElementById('activeGoalsCount');
+            const listEl = document.getElementById('activeGoalsList');
+            const emptyEl = document.getElementById('activeGoalsEmpty');
+            if (countEl) countEl.textContent = goals.length;
+            if (!listEl || !emptyEl) return;
+            listEl.innerHTML = '';
+            if (goals.length === 0) {
+                emptyEl.classList.remove('d-none');
+                return;
+            }
+            emptyEl.classList.add('d-none');
+            goals.slice(0, 5).forEach(goal => {
+                const item = document.createElement('div');
+                item.className = 'mb-3';
+                item.innerHTML = `
+                     <div class="d-flex justify-content-between align-items-center mb-1">
+                         <strong>${goal.subject || '未設定'}</strong>
+                         <small class="text-muted">${goal.dailyTargetMinutes || 0}分/日</small>
+                     </div>
+                     <div class="progress mb-2"><div class="progress-bar" role="progressbar" style="width: 0%"></div></div>
+                     <small class="text-muted">開始日: <span>${goal.startDate || '未設定'}</span></small>
+                 `;
+                listEl.appendChild(item);
+            });
+        }
+
+        document.addEventListener('DOMContentLoaded', renderActiveGoalsOnDashboard);
     </script>
 </body>
 </html> 
