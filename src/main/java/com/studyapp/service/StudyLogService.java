@@ -62,13 +62,28 @@ public class StudyLogService {
         LocalDate today = LocalDate.now();
         LocalDate weekStart = today.with(TemporalAdjusters.previousOrSame(java.time.DayOfWeek.SUNDAY));
         LocalDate weekEnd = today.with(TemporalAdjusters.nextOrSame(java.time.DayOfWeek.SATURDAY));
+
+        // 目標時間（分/日）はアクティブ目標の合計
+        List<LearningGoal> activeGoals = learningGoalRepository.findActiveGoalsByUserId(userId);
+        int targetMinutesPerDay = activeGoals != null
+                ? activeGoals.stream().mapToInt(g -> g.getDailyTargetMinutes() == null ? 0 : g.getDailyTargetMinutes()).sum()
+                : 0;
+
+        // 指定週の全日分を一括集計（1クエリ）
+        List<Object[]> dailySums = studyLogRepository.getDailyStudyMinutes(userId, weekStart, weekEnd);
+        java.util.Map<LocalDate, Integer> dayToMinutes = new java.util.HashMap<>();
+        if (dailySums != null) {
+            for (Object[] row : dailySums) {
+                LocalDate date = (LocalDate) row[0];
+                Number sum = (Number) row[1];
+                dayToMinutes.put(date, sum == null ? 0 : sum.intValue());
+            }
+        }
+
         List<WeeklyProgressDto> weekly = new ArrayList<>();
-        List<LearningGoal> active = learningGoalRepository.findActiveGoalsByUserId(userId);
-        int target = active != null ? active.stream().mapToInt(g -> g.getDailyTargetMinutes() == null ? 0 : g.getDailyTargetMinutes()).sum() : 0;
         for (LocalDate d = weekStart; !d.isAfter(weekEnd); d = d.plusDays(1)) {
-            Integer minutes = studyLogRepository.sumMinutesByUserIdAndStudyDate(userId, d);
-            if (minutes == null) minutes = 0;
-            weekly.add(new WeeklyProgressDto(d, minutes, target));
+            Integer minutes = dayToMinutes.getOrDefault(d, 0);
+            weekly.add(new WeeklyProgressDto(d, minutes, targetMinutesPerDay));
         }
         return weekly;
     }
