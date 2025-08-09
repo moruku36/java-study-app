@@ -93,25 +93,25 @@
                     
                     <ul class="nav flex-column">
                         <li class="nav-item">
-                            <a class="nav-link active" href="/dashboard?userId=1">
+                            <a class="nav-link active" th:href="@{/dashboard(userId=${user.id})}">
                                 <i class="fas fa-tachometer-alt me-2"></i>
                                 ダッシュボード
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/goals?userId=1">
+                            <a class="nav-link" th:href="@{/goals(userId=${user.id})}">
                                 <i class="fas fa-bullseye me-2"></i>
                                 学習目標
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/log?userId=1">
+                            <a class="nav-link" th:href="@{/log(userId=${user.id})}">
                                 <i class="fas fa-plus-circle me-2"></i>
                                 学習記録
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/history?userId=1">
+                            <a class="nav-link" th:href="@{/history(userId=${user.id})}">
                                 <i class="fas fa-history me-2"></i>
                                 学習履歴
                             </a>
@@ -139,7 +139,7 @@
                             ダッシュボード
                         </h1>
                         <div class="btn-toolbar mb-2 mb-md-0">
-                            <a href="/log?userId=1" class="btn btn-primary">
+                            <a th:href="@{/log(userId=${user.id})}" class="btn btn-primary">
                                 <i class="fas fa-plus me-2"></i>
                                 学習記録を追加
                             </a>
@@ -276,7 +276,7 @@
                                     <div th:if="${activeGoals == null or activeGoals.isEmpty()}" class="text-center text-muted">
                                         <i class="fas fa-info-circle fa-2x mb-3"></i>
                                         <p>アクティブな学習目標がありません</p>
-                                        <a href="/goals?userId=1" class="btn btn-primary btn-sm">目標を作成</a>
+                                        <a th:href="@{/goals(userId=${user.id})}" class="btn btn-primary btn-sm">目標を作成</a>
                                     </div>
 
                                     <!-- 目標リスト -->
@@ -289,7 +289,7 @@
                                                         目標: <span th:text="${goal.dailyTargetMinutes}">0</span> 分/日
                                                     </div>
                                                 </div>
-                                                <a href="/goals?userId=1" class="btn btn-outline-primary btn-sm">詳細</a>
+                                                <a th:href="@{/goals(userId=${user.id})}" class="btn btn-outline-primary btn-sm">詳細</a>
                                             </div>
                                         </div>
                                     </div>
@@ -312,7 +312,7 @@
                                     <div th:if="${todayLogs == null or todayLogs.isEmpty()}" class="text-center text-muted">
                                         <i class="fas fa-clipboard-list fa-2x mb-3"></i>
                                         <p>今日の学習記録がありません</p>
-                                        <a href="/log?userId=1" class="btn btn-primary btn-sm">
+                                        <a th:href="@{/log(userId=${user.id})}" class="btn btn-primary btn-sm">
                                             記録を追加
                                         </a>
                                     </div>
@@ -342,11 +342,16 @@
     <script th:inline="javascript">
         // Weekly Progress Chart
         const ctx = document.getElementById('weeklyProgressChart').getContext('2d');
-        
-        const weeklyData = /*[[${weeklyProgress}]]*/ [];
-        const labels = weeklyData ? weeklyData.map(item => item.dayOfWeek || '') : [];
-        const data = weeklyData ? weeklyData.map(item => item.minutesStudied || 0) : [];
-        const targetData = weeklyData ? weeklyData.map(item => item.targetMinutes || 0) : [];
+
+        // サーバー側のDTOを確実に配列へ展開
+        const labels = [];
+        const data = [];
+        const targetData = [];
+        /*[# th:each="wp : ${weeklyProgress}"]*/
+        labels.push(/*[[${wp.dayOfWeek}]]*/ '');
+        data.push(/*[[${wp.minutesStudied}]]*/ 0);
+        targetData.push(/*[[${wp.targetMinutes}]]*/ 0);
+        /*[/]*/
         
         new Chart(ctx, {
             type: 'line',
