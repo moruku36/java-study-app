@@ -42,6 +42,13 @@ spring:
   jpa:
     hibernate:
       ddl-auto: validate
+  # Flyway 設定（既存スキーマに対して履歴テーブルを初期化してからマイグレーションを適用）
+  flyway:
+    enabled: true
+    locations: classpath:db/migration
+    baseline-on-migrate: true
+    baseline-version: 0
+    out-of-order: true
     show-sql: false
     properties:
       hibernate:
