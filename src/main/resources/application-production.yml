@@ -41,7 +41,7 @@ spring:
   # JPA設定（Render無料プラン対応）
   jpa:
     hibernate:
-      ddl-auto: update
+      ddl-auto: validate
     show-sql: false
     properties:
       hibernate:

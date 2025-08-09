@@ -54,6 +54,12 @@
             <artifactId>spring-boot-starter-batch</artifactId>
         </dependency>
 
+            <!-- Flyway for DB migrations -->
+            <dependency>
+                <groupId>org.flywaydb</groupId>
+                <artifactId>flyway-core</artifactId>
+            </dependency>
+
         <!-- Database -->
         <dependency>
             <groupId>com.h2database</groupId>
