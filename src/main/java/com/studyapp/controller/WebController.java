@@ -162,17 +162,45 @@ public class WebController {
                              @RequestParam String subject,
                              @RequestParam Integer dailyTargetMinutes,
                              @RequestParam String startDate,
-                             @RequestParam(required = false) String endDate) {
-        User user = getOrCreateDefault(userId);
-        LearningGoal goal = new LearningGoal();
-        goal.setUser(user);
-        goal.setSubject(subject);
-        goal.setDailyTargetMinutes(dailyTargetMinutes);
-        goal.setStartDate(LocalDate.parse(startDate));
-        if (endDate != null && !endDate.isBlank()) goal.setEndDate(LocalDate.parse(endDate));
-        goal.setIsActive(true);
-        learningGoalService.save(goal);
-        return "redirect:/goals?userId=" + user.getId();
+                             @RequestParam(required = false) String endDate,
+                             Model model) {
+        try {
+            User user = getOrCreateDefault(userId);
+
+            // 入力検証
+            String trimmedSubject = subject == null ? "" : subject.trim();
+            if (trimmedSubject.isEmpty()) { throw new IllegalArgumentException("科目名は必須です"); }
+            if (dailyTargetMinutes == null || dailyTargetMinutes < 1) { throw new IllegalArgumentException("目標時間は1以上で指定してください"); }
+            if (startDate == null || startDate.isBlank()) { throw new IllegalArgumentException("開始日を指定してください"); }
+
+            LocalDate start = LocalDate.parse(startDate);
+            LocalDate end = null;
+            if (endDate != null && !endDate.isBlank()) {
+                end = LocalDate.parse(endDate);
+                if (end.isBefore(start)) { throw new IllegalArgumentException("終了日は開始日以降を指定してください"); }
+            }
+
+            LearningGoal goal = new LearningGoal();
+            goal.setUser(user);
+            goal.setSubject(trimmedSubject);
+            goal.setDailyTargetMinutes(dailyTargetMinutes);
+            goal.setStartDate(start);
+            goal.setEndDate(end);
+            goal.setIsActive(true);
+            learningGoalService.save(goal);
+            return "redirect:/goals?userId=" + user.getId();
+        } catch (Exception e) {
+            // 失敗時はゴール一覧を再描画し、エラーメッセージを表示
+            User user = getOrCreateDefault(userId);
+            model.addAttribute("user", user);
+            List<LearningGoal> goals = new ArrayList<>();
+            try { goals = learningGoalService.findByUserId(user.getId()); } catch (Exception ignored) {}
+            model.addAttribute("goals", goals == null ? new ArrayList<>() : goals);
+            model.addAttribute("newGoal", new LearningGoal());
+            model.addAttribute("hasError", true);
+            model.addAttribute("errorMessage", e.getMessage() == null ? "目標の作成に失敗しました" : e.getMessage());
+            return "goals";
+        }
     }
 
     @PostMapping("/goals/{id}/deactivate")

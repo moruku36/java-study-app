@@ -104,25 +104,25 @@
                     
                     <ul class="nav flex-column">
                         <li class="nav-item">
-                            <a class="nav-link" href="/dashboard?userId=1">
+                            <a class="nav-link" th:href="@{/dashboard(userId=${user.id})}">
                                 <i class="fas fa-tachometer-alt me-2"></i>
                                 ダッシュボード
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link active" href="/goals?userId=1">
+                            <a class="nav-link active" th:href="@{/goals(userId=${user.id})}">
                                 <i class="fas fa-bullseye me-2"></i>
                                 学習目標
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/log?userId=1">
+                            <a class="nav-link" th:href="@{/log(userId=${user.id})}">
                                 <i class="fas fa-plus-circle me-2"></i>
                                 学習記録
                             </a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link" href="/history?userId=1">
+                            <a class="nav-link" th:href="@{/history(userId=${user.id})}">
                                 <i class="fas fa-history me-2"></i>
                                 学習履歴
                             </a>
@@ -157,7 +157,7 @@
                         </div>
                     </div>
                     
-                    <!-- Goals List (JSで描画) -->
+                    <!-- Goals List -->
                     <div class="row">
                         <div class="col-12">
                             <div id="goalsEmpty" class="text-center py-5 d-none">
@@ -207,6 +207,12 @@
                                 </div>
                             </div>
                         </div>
+                    </div>
+
+                    <!-- Error Alert -->
+                    <div th:if="${hasError}" class="alert alert-danger mt-3" role="alert">
+                        <i class="fas fa-exclamation-triangle me-2"></i>
+                        <span th:text="${errorMessage}">エラーメッセージ</span>
                     </div>
                 </div>
             </main>
