@@ -56,6 +56,20 @@ public class WebController {
                 logger.warn("weeklyProgress load failed: {}", e.getMessage());
             }
             model.addAttribute("weeklyProgress", weeklyProgress);
+            // チャート用の配列をサーバー側で生成
+            List<String> weeklyLabels = new ArrayList<>();
+            List<Integer> weeklyData = new ArrayList<>();
+            List<Integer> weeklyTargetData = new ArrayList<>();
+            if (weeklyProgress != null) {
+                for (WeeklyProgressDto wp : weeklyProgress) {
+                    weeklyLabels.add(wp.getDayOfWeek());
+                    weeklyData.add(wp.getMinutesStudied() == null ? 0 : wp.getMinutesStudied());
+                    weeklyTargetData.add(wp.getTargetMinutes() == null ? 0 : wp.getTargetMinutes());
+                }
+            }
+            model.addAttribute("weeklyLabels", weeklyLabels);
+            model.addAttribute("weeklyData", weeklyData);
+            model.addAttribute("weeklyTargetData", weeklyTargetData);
 
             // 今日の記録
             LocalDate today = LocalDate.now();

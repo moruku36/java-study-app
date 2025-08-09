@@ -343,15 +343,10 @@
         // Weekly Progress Chart
         const ctx = document.getElementById('weeklyProgressChart').getContext('2d');
 
-        // サーバー側のDTOを確実に配列へ展開
-        const labels = [];
-        const data = [];
-        const targetData = [];
-        /*[# th:each="wp : ${weeklyProgress}"]*/
-        labels.push('/*[[${wp.dayOfWeek}]]*/');
-        data.push(/*[[${wp.minutesStudied}]]*/ 0);
-        targetData.push(/*[[${wp.targetMinutes}]]*/ 0);
-        /*[/]*/
+        // サーバー生成の配列をそのまま利用
+        const labels = /*[[${weeklyLabels}]]*/ [];
+        const data = /*[[${weeklyData}]]*/ [];
+        const targetData = /*[[${weeklyTargetData}]]*/ [];
         
         new Chart(ctx, {
             type: 'line',
