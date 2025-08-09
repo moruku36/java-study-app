@@ -35,7 +35,11 @@ public class WebController {
     }
 
     @GetMapping("/")
-    public String index() { return "redirect:/dashboard"; }
+    public String index() {
+        // 初回アクセスでもユーザーID付きでダッシュボードへ誘導
+        User user = getOrCreateDefault(null);
+        return "redirect:/dashboard?userId=" + user.getId();
+    }
 
     @GetMapping("/dashboard")
     public String dashboard(@RequestParam(defaultValue = "1") Long userId, Model model) {
