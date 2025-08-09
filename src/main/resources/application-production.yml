@@ -41,7 +41,7 @@ spring:
   # JPA設定（Render無料プラン対応）
   jpa:
     hibernate:
-      ddl-auto: validate
+      ddl-auto: none
   # Flyway 設定（既存スキーマに対して履歴テーブルを初期化してからマイグレーションを適用）
   flyway:
     enabled: true
@@ -49,6 +49,7 @@ spring:
     baseline-on-migrate: true
     baseline-version: 0
     out-of-order: true
+    schemas: public
     show-sql: false
     properties:
       hibernate:
