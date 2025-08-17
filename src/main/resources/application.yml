@@ -4,6 +4,10 @@ spring:
   profiles:
     active: ${SPRING_PROFILES_ACTIVE:local}
   
+  # 起動時間短縮（初回アクセス時にBeanを初期化）
+  main:
+    lazy-initialization: true
+  
   # 基本データベース設定（プロファイル別に上書き）
   datasource:
     url: ${DATABASE_URL:jdbc:h2:mem:studydb}
