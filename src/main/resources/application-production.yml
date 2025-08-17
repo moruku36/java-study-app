@@ -42,6 +42,11 @@ spring:
   jpa:
     hibernate:
       ddl-auto: none
+    show-sql: false
+    properties:
+      hibernate:
+        dialect: org.hibernate.dialect.PostgreSQLDialect
+        format_sql: false
   # Flyway 設定（既存スキーマに対して履歴テーブルを初期化してからマイグレーションを適用）
   flyway:
     enabled: true
@@ -50,22 +55,6 @@ spring:
     baseline-version: 0
     out-of-order: true
     schemas: public
-    show-sql: false
-    properties:
-      hibernate:
-        format_sql: false
-        # 接続安定性向上設定
-        jdbc:
-          batch_size: 5
-        # タイムアウト設定
-        connection:
-          timeout: 30
-        # クエリタイムアウト設定
-        query:
-          timeout: 30
-        # セッションタイムアウト設定
-        session:
-          timeout: 30
 
 # サーバー設定（起動最適化）
 server:

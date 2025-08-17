@@ -17,7 +17,6 @@ spring:
     show-sql: ${SHOW_SQL:true}
     properties:
       hibernate:
-        dialect: ${HIBERNATE_DIALECT:org.hibernate.dialect.H2Dialect}
         format_sql: ${FORMAT_SQL:true}
 
   # Thymeleaf設定

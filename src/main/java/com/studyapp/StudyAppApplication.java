@@ -3,9 +3,11 @@ package com.studyapp;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.boot.context.metrics.buffering.BufferingApplicationStartup;
+import org.springframework.boot.actuate.autoconfigure.security.servlet.ManagementWebSecurityAutoConfiguration;
 
 @SpringBootApplication(exclude = {
-    org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class
+    org.springframework.boot.autoconfigure.security.servlet.SecurityAutoConfiguration.class,
+    ManagementWebSecurityAutoConfiguration.class
 })
 public class StudyAppApplication {
 
