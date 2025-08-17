@@ -33,6 +33,7 @@ spring:
 # サーバー設定
 server:
   port: ${PORT:8080}
+  shutdown: graceful
 
 # ログ設定
 logging:
@@ -40,3 +41,14 @@ logging:
     com.studyapp: ${LOG_LEVEL:DEBUG}
     org.springframework: ${SPRING_LOG_LEVEL:INFO}
     root: ${ROOT_LOG_LEVEL:INFO} 
+
+management:
+  endpoints:
+    web:
+      exposure:
+        include: health,info,metrics,env,loggers,threaddump,heapdump,startup
+  endpoint:
+    health:
+      show-details: when-authorized
+    startup:
+      enabled: true

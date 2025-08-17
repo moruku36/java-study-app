@@ -45,9 +45,9 @@ spring:
   # DevTools設定
   devtools:
     restart:
-      enabled: true
+      enabled: false
     livereload:
-      enabled: true
+      enabled: false
 
 # サーバー設定
 server:
@@ -68,7 +68,9 @@ management:
   endpoints:
     web:
       exposure:
-        include: health,info
+        include: health,info,metrics,startup
   endpoint:
     health:
       show-details: when-authorized 
+    startup:
+      enabled: true

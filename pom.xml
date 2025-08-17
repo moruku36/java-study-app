@@ -54,6 +54,12 @@
             <artifactId>spring-boot-starter-batch</artifactId>
         </dependency>
 
+        <!-- Actuator for health/metrics/startup diagnostics -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-actuator</artifactId>
+        </dependency>
+
             <!-- Flyway for DB migrations -->
             <dependency>
                 <groupId>org.flywaydb</groupId>
